@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>book1</title>
     <link type="text/css" rel="stylesheet" href="assets/css/home.css" />
+    <link type="text/css" rel="stylesheet" href="assets/css/detail.css" />
     <script src="assets/js/home.js"></script>
 </head>
 <body class="background">
@@ -17,11 +18,11 @@
         </p>
     </div>
     <div id="register-modal" class="register-modal hide">
-        <p>用户：<input type="text" /></p>
+        <p>用户：<input id="name" type="text" /></p>
         <p>密码：<input type="password" /></p>
         <p>请再输入一次密码：<input type="reinput-password" /></p>
         <p>
-            <input type="button" value="注册">
+            <input type="button" value="注册" onclick="welcome();RegisterHide();">
             <input type="button" value="取消" onclick="RegisterHide();">
         </p>
     </div>
@@ -66,6 +67,28 @@
                     <input style="width: 70vh">
                     <input class="button" type="submit" value="Search">
                 </div>
+            </div>
+            <div class="introduction">
+                <img src="images/default.png"/>
+                <div class="information">
+                    <p>作者：</p>
+                    <p>出版年：</p>
+                    <p>定价：</p>
+                    <p>ISBN：</p>
+                </div>
+            </div>
+            <div class="content">
+                <h1>内容简介</h1>
+                <p>第一章：…………</p>
+                <p>第二章：…………</p>
+                <p>第三章：…………</p>
+            </div>
+            <hr />
+            <div class="assessment">
+                <h1>评价</h1>
+            </div>
+            <div>
+                <button>加入购物车</button>
             </div>
         </div>
         <div id="float-right" class="float-right"></div>

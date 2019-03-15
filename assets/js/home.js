@@ -115,3 +115,8 @@ function colorChange(_this) {
         }
     }
 }
+
+function welcome(){
+    var name = document.getElementById("name").value;
+    alert(name + "您好，感谢您的注册。")
+}
