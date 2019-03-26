@@ -1,0 +1,240 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import Zoom from '@material-ui/core/Zoom';
+import BookInformation from './bookInformation';
+import Button from '@material-ui/core/Button';
+import ButtonBase from '@material-ui/core/ButtonBase';
+import Typography from '@material-ui/core/Typography';
+
+const styles = theme => ({
+    root: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        minWidth: 300,
+        width: '100%',
+        marginLeft: '240px',
+    },
+    image: {
+        position: 'relative',
+        height: 200,
+        [theme.breakpoints.down('xs')]: {
+            width: '100% !important', // Overrides inline-style
+            height: 100,
+        },
+        '&:hover, &$focusVisible': {
+            zIndex: 1,
+            '& $imageBackdrop': {
+                opacity: 0.15,
+            },
+            '& $imageMarked': {
+                opacity: 0,
+            },
+            '& $imageTitle': {
+                border: '4px solid currentColor',
+            },
+        },
+    },
+    focusVisible: {},
+    imageButton: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: theme.palette.common.white,
+    },
+    imageSrc: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center 40%',
+    },
+    imageBackdrop: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        backgroundColor: theme.palette.common.black,
+        opacity: 0.4,
+        transition: theme.transitions.create('opacity'),
+    },
+    imageTitle: {
+        position: 'relative',
+        padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 4}px ${theme.spacing.unit + 6}px`,
+    },
+    imageMarked: {
+        height: 3,
+        width: 18,
+        backgroundColor: theme.palette.common.white,
+        position: 'absolute',
+        bottom: -2,
+        left: 'calc(50% - 9px)',
+        transition: theme.transitions.create('opacity'),
+    },
+});
+
+/*
+const styles = theme => ({
+    root: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        overflow: 'hidden',
+        marginLeft: '240px',
+    },
+    fab: {
+        margin: theme.spacing.unit * 2,
+    },
+    absolute: {
+        position: 'absolute',
+        bottom: theme.spacing.unit * 2,
+        right: theme.spacing.unit * 3,
+    },
+});
+*/
+
+var bottomStyle= {
+    height: '240px',
+    width: '180px',
+    margin: '10px',
+    marginTop: '50px',
+}
+
+var bookStyle= {
+    height: '240px',
+    width: '180px',
+}
+
+const bookInfo = [
+    {
+        id: 0,
+        img: require('../images/book1.jpg'),
+        title: '游戏设计艺术（第2版）',
+        author: '[美] Jesse Schell',
+        price: '168.00元',
+        isbn: '9787121282669',
+        detail: '《游戏设计艺术（第2版）》主要内容包括：游戏的体验、构成游戏的元素、元素支撑的主题、游戏的改进、游戏机制、游戏中的角色、游戏设计团队、如何开发好的游戏、如何推销游戏、设计者的责任等。',
+    },
+    {
+        id: 1,
+        img: require('../images/book2.jpg'),
+        title: '游戏设计梦工厂',
+        author: 'Tracy Fullerton（特雷西•富勒顿）',
+        price: '119.00元',
+        isbn: '9787121284663',
+        detail: '从了解游戏设计师的角色及游戏的结构开始，到游戏的正规、戏剧和动态元素，再到游戏的原型制作和游戏测试，直到游戏的打磨、发行和游戏制作，覆盖游戏设计的方方面面，适合不同阶段的游戏设计师。',
+    },
+    {
+        id: 2,
+        img: require('../images/book3.jpg'),
+        title: '游戏的人',
+        author: '[荷] 约翰·赫伊津哈',
+        price: '28.00元',
+        isbn: '9787536050686',
+        detail: '本书研究游戏在人类进化和文化发展中的重要作用。强调指出：游戏是文化本质的、固有的、不可或缺的、决非偶然的成分。',
+    },
+    {
+        id: 3,
+        img: require('../images/book4.jpg'),
+        title: '有限与无限的游戏',
+        author: '[美]詹姆斯·卡斯',
+        price: '35.00元',
+        isbn: '9787121215698',
+        detail: '在这本书中，詹姆斯·卡斯向我们展示了世界上两种类型的「游戏」：「有限的游戏」和「无限的游戏」。',
+    },
+    {
+        id: 4,
+        img: require('../images/book5.jpg'),
+        title: '游戏改变世界',
+        author: '[美] 简·麦戈尼格尔',
+        price: '59.90元',
+        isbn: '9787213049422',
+        detail: '作者在书中用大量事例告诉我们，游戏击中了人类幸福的核心，提供了令人愉悦的奖励、刺激性的挑战和宏大的胜利，而这些都是现实世界十分匮乏的。她的研究表明，我们可以借助游戏的力量，让生活变得像游戏一样精彩。',
+    },
+];
+
+var defaultOpen = [false, false, false, false, false]
+
+class Book extends Component{
+    //{ classes } = props;
+    state = {
+        open: defaultOpen,
+    };
+
+    handleClickOpen(bookId){
+        defaultOpen[bookId] = true;
+        this.setState({
+            open: defaultOpen
+        });
+    };
+
+    handleClose(bookId){
+        defaultOpen[bookId] = false;
+        this.setState({ open: defaultOpen, });
+    };
+    render(){
+        const { classes } = this.props;
+        const { open } = this.state;
+        return(
+            <div className={classes.root}>
+                {bookInfo.map(book => (
+                    <div>
+                        <ButtonBase
+                            focusRipple
+                            key={book.title}
+                            className={classes.image}
+                            focusVisibleClassName={classes.focusVisible}
+                            style={bottomStyle}
+                            onClick={() => this.handleClickOpen(book.id)}
+                        >
+                            <span
+                              className={classes.imageSrc}
+                              style={{
+                                  backgroundImage: `url(${book.img})`,
+                              }}
+                            />
+                            <span className={classes.imageBackdrop} />
+                            <span className={classes.imageButton}>
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    color="inherit"
+                                    className={classes.imageTitle}
+                                >
+                                    {book.title}
+                                    <span className={classes.imageMarked} />
+                                </Typography>
+                            </span>
+                        </ButtonBase>
+                        <BookInformation
+                            selectedValue={this.state.selectedValue}
+                            open={this.state.open[book.id]}
+                            onClose={() => this.handleClose(book.id)}
+                            img={book.img}
+                            title={book.title}
+                            author={book.author}
+                            price={book.price}
+                            isbn={book.isbn}
+                            detail={book.detail}
+                            imgStyle={bookStyle}
+                        />
+                    </div>
+                ))}
+            </div>
+        )
+    }
+}
+
+Book.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Book);

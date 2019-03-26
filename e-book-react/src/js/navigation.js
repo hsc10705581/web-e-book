@@ -83,10 +83,18 @@ function ListItemLink(props) {
     return <ListItem button component="a" {...props} />;
 }
 
-class ButtonAppBar extends React.Component {
+class Navigation extends React.Component {
     state = {
         open: false,
     };
+
+    showBooks = () => {
+        this.props.showBooks();
+    }
+
+    showIntro = () => {
+        this.props.showIntro();
+    }
 
     handleDrawerOpen = () => {
         this.setState({ open: true });
@@ -103,7 +111,7 @@ class ButtonAppBar extends React.Component {
             register: "#",
             login: "#",
             recommendedBooks: "#",
-            allBooks: "#",
+            allBooks: "%PUBLIC_URL%/detail.html",
             shoppingCart: "#",
         };
 
@@ -148,10 +156,13 @@ class ButtonAppBar extends React.Component {
                     </div>
                     <Divider />
                     <List>
+                        <ListItemLink onClick={this.showIntro}>
+                            <ListItemText primary="首页"/>
+                        </ListItemLink>
                         <ListItemLink href={links.recommendedBooks}>
                             <ListItemText primary="推荐列表"/>
                         </ListItemLink>
-                        <ListItemLink href={links.allBooks}>
+                        <ListItemLink onClick={this.showBooks}>
                             <ListItemText primary="全部书籍"/>
                         </ListItemLink>
                         <ListItemLink href={links.shoppingCart}>
@@ -164,9 +175,9 @@ class ButtonAppBar extends React.Component {
     }
 }
 
-ButtonAppBar.propTypes = {
+Navigation.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(ButtonAppBar);
+export default withStyles(styles, { withTheme: true })(Navigation);
