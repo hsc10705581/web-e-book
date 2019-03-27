@@ -16,6 +16,8 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ShoppingCart from '@material-ui/icons/ShoppingCart';
+import Login from './login';
 
 const drawerWidth = 240;
 
@@ -77,39 +79,66 @@ const styles = theme => ({
         }),
         marginLeft: 0,
     },
+    button: {
+        margin: theme.spacing.unit,
+    },
 });
 
 function ListItemLink(props) {
     return <ListItem button component="a" {...props} />;
 }
 
+let hide = {
+    display: "none",
+}
+
+let show = {
+    display: "inline"
+}
+
 class Navigation extends React.Component {
     state = {
-        open: false,
+        openDrawer: false,
+        openLogin: false,
+        showShoppingCart: hide,
+        showLogin: show,
     };
 
     showBooks = () => {
         this.props.showBooks();
-    }
+    };
 
     showIntro = () => {
         this.props.showIntro();
-    }
+    };
 
     handleDrawerOpen = () => {
-        this.setState({ open: true });
+        this.setState({ openDrawer: true });
     };
 
     handleDrawerClose = () => {
-        this.setState({ open: false });
+        this.setState({ openDrawer: false });
     };
+
+    handleLoginOpen = () => {
+        this.setState({ openLogin: true});
+    };
+
+    handleLoginClose = () => {
+        this.setState({ openLogin: false});
+    };
+
+    login = () => {
+        this.setState({
+            showShoppingCart: show,
+            showLogin: hide,
+        });
+    }
 
     render() {
         const { classes, theme } = this.props;
-        const { open } = this.state;
+        const { openDrawer } = this.state;
         const links = {
-            register: "#",
-            login: "#",
             recommendedBooks: "#",
             allBooks: "%PUBLIC_URL%/detail.html",
             shoppingCart: "#",
@@ -121,30 +150,38 @@ class Navigation extends React.Component {
                 <AppBar
                     position="fixed"
                     className={classNames(classes.appBar, {
-                        [classes.appBarShift]: open,
+                        [classes.appBarShift]: openDrawer,
                     })}
                 >
-                    <Toolbar disableGutters={!open}>
+                    <Toolbar disableGutters={!openDrawer}>
                         <IconButton
                             color="inherit"
                             aria-label="Open drawer"
                             onClick={this.handleDrawerOpen}
-                            className={classNames(classes.menuButton, open && classes.hide)}
+                            className={classNames(classes.menuButton, openDrawer && classes.hide)}
                         >
                             <MenuIcon />
                         </IconButton>
                         <Typography variant="h6" color="inherit" className={classes.grow} noWrap>
                             e-book
                         </Typography>
-                        <Button color="inherit" href={links.register} noWrap>注册</Button>
-                        <Button color="inherit" href={links.login} noWrap>登录</Button>
+                        <div style={this.state.showLogin}>
+                            <Button color="inherit" href={links.register}>注册</Button>
+                            <Button color="inherit" onClick={this.handleLoginOpen}>登录</Button>
+                        </div>
+                        <div style={this.state.showShoppingCart}>
+                            <IconButton className={classes.button} aria-label="Delete" color="inherit">
+                                购物车：
+                                <ShoppingCart />
+                            </IconButton>
+                        </div>
                     </Toolbar>
                 </AppBar>
                 <Drawer
                     className={classes.drawer}
                     variant="persistent"
                     anchor="left"
-                    open={open}
+                    open={openDrawer}
                     classes={{
                         paper: classes.drawerPaper,
                     }}
@@ -170,6 +207,7 @@ class Navigation extends React.Component {
                         </ListItemLink>
                     </List>
                 </Drawer>
+                <Login open={this.state.openLogin} onClose={() => this.handleLoginClose()} login={() => this.login()} />
             </div>
         );
     }

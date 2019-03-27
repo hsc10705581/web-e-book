@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import Zoom from '@material-ui/core/Zoom';
 import BookInformation from './bookInformation';
-import Button from '@material-ui/core/Button';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
 
@@ -101,17 +98,17 @@ const styles = theme => ({
 });
 */
 
-var bottomStyle= {
+let bottomStyle= {
     height: '240px',
     width: '180px',
     margin: '10px',
     marginTop: '50px',
-}
+};
 
-var bookStyle= {
+let bookStyle= {
     height: '240px',
     width: '180px',
-}
+};
 
 const bookInfo = [
     {
@@ -161,7 +158,7 @@ const bookInfo = [
     },
 ];
 
-var defaultOpen = [false, false, false, false, false]
+let defaultOpen = [false, false, false, false, false];
 
 class Book extends Component{
     //{ classes } = props;
@@ -182,11 +179,10 @@ class Book extends Component{
     };
     render(){
         const { classes } = this.props;
-        const { open } = this.state;
         return(
             <div className={classes.root}>
                 {bookInfo.map(book => (
-                    <div>
+                    <div key={book.id}>
                         <ButtonBase
                             focusRipple
                             key={book.title}

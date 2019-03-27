@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './App.css';
-import Background from './images/back.jpg'
 import Navigation from "./js/navigation";
 
 var sectionStyle = {
@@ -41,9 +40,6 @@ class App extends Component {
     };
 
     render() {
-        const icons = {
-            icon1: ""
-        }
         return (
             <div className="App" style={sectionStyle}>
                 <div id="navigation">
@@ -53,8 +49,8 @@ class App extends Component {
                     />
                 </div>
                 <div>
-                    <div id="introduction" style={this.state.introductionStyle}></div>
-                    <div id="books" style={this.state.booksStyle}></div>
+                    <div id="introduction" style={this.state.introductionStyle}/>
+                    <div id="books" style={this.state.booksStyle}/>
                 </div>
             </div>
         );
