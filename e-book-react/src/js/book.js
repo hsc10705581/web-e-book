@@ -4,14 +4,37 @@ import { withStyles } from '@material-ui/core/styles';
 import BookInformation from './bookInformation';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
+import InputBase from '@material-ui/core/InputBase';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import VoiceIcon from '@material-ui/icons/KeyboardVoice'
+import Paper from '@material-ui/core/Paper';
+
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 const styles = theme => ({
     root: {
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginLeft: '240px',
+    },
+    bookRoot: {
+        display: 'flex',
         flexWrap: 'wrap',
         minWidth: 300,
         width: '100%',
-        marginLeft: '240px',
+    },
+    searchRoot: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: '80%',
+        marginTop: '50px',
     },
     image: {
         position: 'relative',
@@ -76,6 +99,23 @@ const styles = theme => ({
         bottom: -2,
         left: 'calc(50% - 9px)',
         transition: theme.transitions.create('opacity'),
+    },
+    input: {
+        marginLeft: 8,
+        flex: 1,
+    },
+    iconButton: {
+        padding: 10,
+    },
+    divider: {
+        width: 1,
+        height: 28,
+        margin: 4,
+    },
+
+    formControl: {
+        margin: theme.spacing.unit,
+        minWidth: 120,
     },
 });
 
@@ -158,12 +198,17 @@ const bookInfo = [
     },
 ];
 
+const choices = ['书名', '作者', 'isbn']; //可供搜索的选项
+
 let defaultOpen = [false, false, false, false, false];
 
 class Book extends Component{
     //{ classes } = props;
     state = {
         open: defaultOpen,
+        bookList: bookInfo,
+        choice: "书名",
+        listOpen: false,
     };
 
     handleClickOpen(bookId){
@@ -177,53 +222,116 @@ class Book extends Component{
         defaultOpen[bookId] = false;
         this.setState({ open: defaultOpen, });
     };
+
+    handleChange(){
+        let input = document.getElementById('search').value.toLowerCase();
+        let newList = bookInfo.filter( (item) => {
+            if(this.state.choice === "书名")
+                return item.title.trim().toLowerCase().indexOf(input) !== -1;
+            else if(this.state.choice === "作者")
+                return item.author.trim().toLowerCase().indexOf(input) !== -1;
+            else if(this.state.choice === "isbn")
+                return item.isbn.trim().toLowerCase().indexOf(input) !== -1;
+            else
+                return false;
+        })
+        this.setState({
+            bookList: newList,
+        })
+    };
+
+    handleListChange = event => {
+        this.setState({ [event.target.name]: event.target.value });
+    };
+
+    handleListClose = () => {
+        this.setState({ listOpen: false });
+    };
+
+    handleListOpen = () => {
+        this.setState({ listOpen: true });
+    };
+
     render(){
         const { classes } = this.props;
         return(
             <div className={classes.root}>
-                {bookInfo.map(book => (
-                    <div key={book.id}>
-                        <ButtonBase
-                            focusRipple
-                            key={book.title}
-                            className={classes.image}
-                            focusVisibleClassName={classes.focusVisible}
-                            style={bottomStyle}
-                            onClick={() => this.handleClickOpen(book.id)}
-                        >
-                            <span
-                              className={classes.imageSrc}
-                              style={{
-                                  backgroundImage: `url(${book.img})`,
-                              }}
+                <Paper className={classes.searchRoot} elevation={1}>
+                    <form autoComplete="off">
+                        <FormControl className={classes.formControl}>
+                            <Select
+                                open={this.state.listOpen}
+                                onClose={this.handleListClose}
+                                onOpen={this.handleListOpen}
+                                value={this.state.choice}
+                                onChange={this.handleListChange}
+                                inputProps={{
+                                    name: 'choice',
+                                    id: 'demo-controlled-open-select',
+                                }}
+                            >
+                                {choices.map(choice => (
+                                    <MenuItem key={choice} value={choice}>
+                                        {choice}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </form>
+                    <InputBase className={classes.input} id={'search'} placeholder={"输入要搜索的" + this.state.choice} onChange={this.handleChange.bind(this)}/>
+                    <IconButton className={classes.iconButton} aria-label="Search" onClick={() => this.handleChange()}>
+                        <SearchIcon />
+                    </IconButton>
+                    <Divider className={classes.divider} />
+                    <IconButton color="primary" className={classes.iconButton} aria-label="Directions">
+                        <VoiceIcon />
+                    </IconButton>
+                </Paper>
+                <div className={classes.bookRoot}>
+                    {this.state.bookList.map(book => (
+                        <div key={book.id}>
+                            <ButtonBase
+                                focusRipple
+                                key={book.title}
+                                className={classes.image}
+                                focusVisibleClassName={classes.focusVisible}
+                                style={bottomStyle}
+                                onClick={() => this.handleClickOpen(book.id)}
+                            >
+                                    <span
+                                        className={classes.imageSrc}
+                                        style={{
+                                            backgroundImage: `url(${book.img})`,
+                                        }}
+                                    />
+                                <span className={classes.imageBackdrop} />
+                                <span className={classes.imageButton}>
+                                        <Typography
+                                            component="span"
+                                            variant="subtitle1"
+                                            color="inherit"
+                                            className={classes.imageTitle}
+                                        >
+                                            {book.title}
+                                            <span className={classes.imageMarked} />
+                                        </Typography>
+                                    </span>
+                            </ButtonBase>
+                            <BookInformation
+                                selectedValue={this.state.selectedValue}
+                                open={this.state.open[book.id]}
+                                onClose={() => this.handleClose(book.id)}
+                                img={book.img}
+                                title={book.title}
+                                author={book.author}
+                                price={book.price}
+                                isbn={book.isbn}
+                                detail={book.detail}
+                                imgStyle={bookStyle}
                             />
-                            <span className={classes.imageBackdrop} />
-                            <span className={classes.imageButton}>
-                                <Typography
-                                    component="span"
-                                    variant="subtitle1"
-                                    color="inherit"
-                                    className={classes.imageTitle}
-                                >
-                                    {book.title}
-                                    <span className={classes.imageMarked} />
-                                </Typography>
-                            </span>
-                        </ButtonBase>
-                        <BookInformation
-                            selectedValue={this.state.selectedValue}
-                            open={this.state.open[book.id]}
-                            onClose={() => this.handleClose(book.id)}
-                            img={book.img}
-                            title={book.title}
-                            author={book.author}
-                            price={book.price}
-                            isbn={book.isbn}
-                            detail={book.detail}
-                            imgStyle={bookStyle}
-                        />
-                    </div>
-                ))}
+                        </div>
+                    ))}
+                </div>
             </div>
         )
     }

@@ -135,6 +135,13 @@ class Navigation extends React.Component {
         });
     }
 
+    logout = () => {
+        this.setState({
+            showShoppingCart: hide,
+            showLogin: show,
+        });
+    }
+
     render() {
         const { classes, theme } = this.props;
         const { openDrawer } = this.state;
@@ -170,6 +177,7 @@ class Navigation extends React.Component {
                             <Button color="inherit" onClick={this.handleLoginOpen}>登录</Button>
                         </div>
                         <div style={this.state.showShoppingCart}>
+                            <Button color="inherit" onClick={() => this.logout()}>登出</Button>
                             <IconButton className={classes.button} aria-label="Delete" color="inherit">
                                 购物车：
                                 <ShoppingCart />
@@ -201,9 +209,6 @@ class Navigation extends React.Component {
                         </ListItemLink>
                         <ListItemLink onClick={this.showBooks}>
                             <ListItemText primary="全部书籍"/>
-                        </ListItemLink>
-                        <ListItemLink href={links.shoppingCart}>
-                            <ListItemText primary="我的购物车"/>
                         </ListItemLink>
                     </List>
                 </Drawer>

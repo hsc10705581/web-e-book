@@ -4,9 +4,8 @@ import Navigation from "./js/navigation";
 
 var sectionStyle = {
     width: "100%",
-    height: "1000px",
+    height: "100%",
     marginTop: "64px",
-// makesure here is String确保这里是一个字符串，以下是es6写法
     backgroundColor: "#FFFFF0",
     backgroundSize: "100% 100%",
 };
