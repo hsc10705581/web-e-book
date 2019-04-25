@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
+import $ from "jquery";
 
 const styles = {
     avatar: {
@@ -60,6 +61,29 @@ const DialogActions = withStyles(theme => ({
 }))(MuiDialogActions);
 
 class BookInformation extends Component{
+
+    handleAdd = () => {
+        this.handleClose();
+        if(this.props.user === null)
+            alert("要登录才能把书本加入购物车哦");
+        else if(this.props.stock === 0)
+            alert("这本书的库存为0哦");
+        else
+        {
+            let saveDataAry = {
+                username: this.props.user,
+                b_ID: this.props.bookID,
+            }
+            $.post(
+                "http://localhost:8080/addProduct",
+                {values: JSON.stringify(saveDataAry)},
+                function (data){
+                    let array = JSON.parse(data);
+                    console.log(array);
+                }.bind(this));
+        }
+    }
+
     handleClose = () => {
         this.props.onClose(this.props.selectedValue);
     };
@@ -84,7 +108,10 @@ class BookInformation extends Component{
                         内容: {this.props.detail}
                     </Typography>
                     <DialogActions>
-                        <Button onClick={this.handleClose} color="primary">
+                        <Typography>
+                            库存: {this.props.stock}
+                        </Typography>
+                        <Button onClick={this.handleAdd} color="primary">
                             加入购物车
                         </Button>
                     </DialogActions>

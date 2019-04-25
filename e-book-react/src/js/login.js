@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default class Login extends React.Component {
 
-    handleClose = () => {
+    handleLogin = () => {
         this.props.onClose();
         this.props.login();
     };
@@ -31,7 +31,7 @@ export default class Login extends React.Component {
                             required
                             autoFocus
                             margin="dense"
-                            id="name"
+                            id="loginName"
                             label="用户名"
                             type="username"
                             helperText=""
@@ -41,7 +41,7 @@ export default class Login extends React.Component {
                             required
                             autoFocus
                             margin="dense"
-                            id="password"
+                            id="loginPassword"
                             label="密码"
                             type="password"
                             autoComplete="current-password"
@@ -49,7 +49,7 @@ export default class Login extends React.Component {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleClose} color="primary">
+                        <Button onClick={this.handleLogin} color="primary">
                             登录
                         </Button>
                         <Button onClick={this.props.onClose} color="secondary">

@@ -150,7 +150,7 @@ let bookStyle= {
     width: '180px',
 };
 
-const bookInfo = [
+/*const bookInfo = [
     {
         id: 0,
         img: require('../images/book1.jpg'),
@@ -196,7 +196,7 @@ const bookInfo = [
         isbn: '9787213049422',
         detail: '作者在书中用大量事例告诉我们，游戏击中了人类幸福的核心，提供了令人愉悦的奖励、刺激性的挑战和宏大的胜利，而这些都是现实世界十分匮乏的。她的研究表明，我们可以借助游戏的力量，让生活变得像游戏一样精彩。',
     },
-];
+];*/
 
 const choices = ['书名', '作者', 'isbn']; //可供搜索的选项
 
@@ -206,10 +206,29 @@ class Book extends Component{
     //{ classes } = props;
     state = {
         open: defaultOpen,
-        bookList: bookInfo,
+        bookList: [],
         choice: "书名",
         listOpen: false,
+        bookInfo: [],
+        user: null,
     };
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.bookInfo !== nextProps.bookInfo || this.state.user !== nextProps.user) {
+            this.setState({
+                bookInfo: nextProps.bookInfo,
+                bookList: nextProps.bookInfo,
+                user: nextProps.user,
+            })
+        }
+    }
+
+    update(bookInfo){
+        this.setState({
+            bookInfo: bookInfo,
+            bookList: bookInfo
+        })
+    }
 
     handleClickOpen(bookId){
         defaultOpen[bookId] = true;
@@ -225,7 +244,7 @@ class Book extends Component{
 
     handleChange(){
         let input = document.getElementById('search').value.toLowerCase();
-        let newList = bookInfo.filter( (item) => {
+        let newList = this.state.bookInfo.filter( (item) => {
             if(this.state.choice === "书名")
                 return item.title.trim().toLowerCase().indexOf(input) !== -1;
             else if(this.state.choice === "作者")
@@ -234,7 +253,7 @@ class Book extends Component{
                 return item.isbn.trim().toLowerCase().indexOf(input) !== -1;
             else
                 return false;
-        })
+        });
         this.setState({
             bookList: newList,
         })
@@ -317,6 +336,7 @@ class Book extends Component{
                                         </Typography>
                                     </span>
                             </ButtonBase>
+                            <Typography>库存:{book.stock}</Typography>
                             <BookInformation
                                 selectedValue={this.state.selectedValue}
                                 open={this.state.open[book.id]}
@@ -327,7 +347,10 @@ class Book extends Component{
                                 price={book.price}
                                 isbn={book.isbn}
                                 detail={book.detail}
+                                stock={book.stock}
                                 imgStyle={bookStyle}
+                                bookID={book.id}
+                                user={this.state.user}
                             />
                         </div>
                     ))}
