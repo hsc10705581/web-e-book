@@ -351,6 +351,7 @@ class Book extends Component{
                                 imgStyle={bookStyle}
                                 bookID={book.id}
                                 user={this.state.user}
+                                addABookToCart={(bookID, stock) => this.props.addABookToCart(bookID, stock)}
                             />
                         </div>
                     ))}

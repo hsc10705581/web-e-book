@@ -20,8 +20,8 @@ import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import HighLight from '@material-ui/icons/Highlight';
 import Login from './login';
 import Register from './register';
-import $ from 'jquery';
 import Product from './product';
+import SearchOrders from './searchOrders';
 
 const drawerWidth = 240;
 
@@ -113,14 +113,56 @@ class Navigation extends React.Component {
         openDrawer: false,
         openLogin: false,
         openRegister: false,
+        openSearch: false,
         showShoppingCart: hide,
         showLogin: show,
         topBarStyle: {backgroundColor: "#3f51b5", color: "white"},
         username: null,
         role: null,
         cartProducts: [],
-        totalPrice: 0
+        totalPrice: 0,
+        isAdmin: hide,
     };
+
+    componentWillReceiveProps(nextProps) {
+        if (this.state.cartProducts !== nextProps.cartProducts) {
+            this.setState({
+                cartProducts: nextProps.cartProducts,
+            })
+        }
+        if (this.state.username !== nextProps.username) {
+            if (nextProps.username !== null)
+            {
+                this.setState({
+                    username: nextProps.username,
+                    role: nextProps.role,
+                    showShoppingCart: show,
+                    showLogin: hide,
+                })
+            }
+            else
+            {
+                this.setState({
+                    username: null,
+                    role: null,
+                    showShoppingCart: hide,
+                    showLogin: show,
+                })
+            }
+        }
+        if (nextProps.role === "ADMIN")
+        {
+            this.setState({
+                isAdmin: show,
+            })
+        }
+        else
+        {
+            this.setState({
+                isAdmin: hide,
+            })
+        }
+    }
 
     showBooks = () => {
         this.props.showBooks();
@@ -129,24 +171,9 @@ class Navigation extends React.Component {
         this.props.showIntro();
     };
 
-    refreshShoppingCartOpen(){
-        let saveDataAry = {
-            username: this.state.username,
-        };
-        $.post(
-            "http://localhost:8080/shoppingCart",
-            {values: JSON.stringify(saveDataAry)},
-            function (data) {
-                let cartProducts = JSON.parse(data);
-                this.setState({
-                    cartProducts: cartProducts,
-                })
-            }.bind(this));
-    };
-
     handleShoppingCartOpen = () => {
+        this.props.refreshShoppingCartOpen();
         this.setState({openShoppingCart: true});
-        this.refreshShoppingCartOpen();
     };
     handleShoppingCartClose = () => {
         this.setState({openShoppingCart: false})
@@ -169,77 +196,11 @@ class Navigation extends React.Component {
     handleRegisterClose = () => {
         this.setState({openRegister: false});
     };
-    login = () => {
-        let saveDataAry = {
-            username: document.getElementById("loginName").value,
-            password: document.getElementById("loginPassword").value,
-        };
-        if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
-            alert("请输入用户名或密码");
-        else{
-            $.post(
-                "http://localhost:8080/userLogin",
-                {values: JSON.stringify(saveDataAry)},
-                function (data){
-                    var array = JSON.parse(data);
-                    if(array[0] === false)
-                    {
-                        alert(array[1]);
-                    }
-                    else
-                    {
-                        alert(array[1]);
-                        this.setState({
-                            username: array[2],
-                            role: array[3],
-                            showShoppingCart: show,
-                            showLogin: hide,
-                        });
-                        this.props.getUserInformation(array[2], array[3]);
-                    }
-                }.bind(this)
-            );
-        }
+    handleSearchOpen = () => {
+        this.setState({openSearch: true});
     };
-    register = () => {
-        var saveDataAry = {
-            username: document.getElementById("registerName").value,
-            password: document.getElementById("registerPassword1").value,
-            email: document.getElementById("registerEmail").value,
-        };
-        if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
-            alert("请输入用户名或密码");
-        else{
-            $.post(
-                "http://localhost:8080/userRegister",
-                {values: JSON.stringify(saveDataAry)},
-                function (data){
-                    var array = JSON.parse(data);
-                    if(array[0] === false)
-                    {
-                        alert(array[1]);
-                    }
-                    else
-                    {
-                        alert(array[1]);
-                        this.setState({
-                            username: array[2],
-                            role: array[3],
-                            showShoppingCart: show,
-                            showLogin: hide,
-                        });
-                    }
-                }.bind(this)
-            );
-        }
-    };
-    logout = () => {
-        this.setState({
-            showShoppingCart: hide,
-            showLogin: show,
-            username: null,
-            role: null,
-        });
+    handleSearchClose = () => {
+        this.setState({openSearch: false});
     };
     changeStyle = () => {
         this.props.changeStyle();
@@ -248,47 +209,26 @@ class Navigation extends React.Component {
             topBarStyle: (tmp % 2) === 1 ? {backgroundColor: "#f5f5f5", color: "black"} : {backgroundColor: "#3f51b5", color: "white"},
         })
     };
-
-    bookAddRemove(amount, bookID) {
-        let saveDataAry = {
-            username: this.state.username,
-            b_ID: bookID,
-            amount: amount
-        };
-        $.ajax({
-            type: "POST",
-            async: false,
-            url: "http://localhost:8080/addProduct",
-            data: {values: JSON.stringify(saveDataAry)},
-            success: function (data){
-                let array = JSON.parse(data);
-                if(array["success"] === false)
-                    alert(array["alert"]);
-            }.bind(this)
-        });
-        this.refreshShoppingCartOpen();
-    };
-
     checkout = () => {
         if(this.state.cartProducts.length === 0)
             alert("您的购物车是空的哦");
         else{
-            let saveDataAry = {
-                cartProducts: this.state.cartProducts,
-                username: this.state.username,
-            };
-            $.ajax({
-                type: "POST",
-                async: false,
-                url: "http://localhost:8080/checkout",
-                data: {values: JSON.stringify(saveDataAry)},
-                success: function (data){
-                    alert(data);
-                }.bind(this)
-            });
-            this.refreshShoppingCartOpen();
-            window.location.href = "http://localhost:8080/getOrder/" + this.state.username;
+            this.props.checkout();
+            this.showUnfinishedOrders();
         }
+    };
+    search = () => {
+        let beginDate = document.getElementById("beginDate").value;
+        let endDate = document.getElementById("endDate").value;
+        window.location.href = "http://localhost:8080/getSpecialOrders1/" + this.state.username + "/" + beginDate + "/" + endDate;
+    };
+
+    showAllOrders = () => {
+        this.props.showOrders();
+    };
+
+    showAllUsers = () => {
+        this.props.showUsers();
     };
 
     render() {
@@ -328,7 +268,7 @@ class Navigation extends React.Component {
                             <Typography variant="h6" color="inherit" className={classes.grow} noWrap>
                                 {this.state.username} 您的权限: {this.state.role}
                             </Typography>
-                            <Button color="inherit" onClick={() => this.logout()}>登出</Button>
+                            <Button color="inherit" onClick={() => this.props.logout()}>登出</Button>
                             <IconButton className={classes.button} aria-label="Delete" color="inherit" onClick={this.handleShoppingCartOpen}>
                                 <ShoppingCart />
                             </IconButton>
@@ -360,6 +300,14 @@ class Navigation extends React.Component {
                         <ListItemLink onClick={this.showBooks}>
                             <ListItemText primary="全部书籍"/>
                         </ListItemLink>
+                        <Divider/>
+                        <ListItemLink onClick={this.showAllOrders} style={this.state.showShoppingCart}>
+                            <ListItemText primary="查看所有订单"/>
+                        </ListItemLink>
+                        <Divider/>
+                        <ListItemLink onClick={this.showAllUsers} style={this.state.isAdmin}>
+                            <ListItemText primary="管理所有用户"/>
+                        </ListItemLink>
                     </List>
                 </Drawer>
                 <Drawer
@@ -385,7 +333,7 @@ class Navigation extends React.Component {
                                     price={product.price}
                                     amount={product.amount}
                                     b_ID={product.b_ID}
-                                    bookAddRemove={(amount, bookID) => this.bookAddRemove(amount, bookID)}
+                                    bookAddRemove={(amount, bookID) => this.props.bookAddRemove(amount, bookID)}
                                 />
                             </ListItem>
                         ))}
@@ -393,11 +341,16 @@ class Navigation extends React.Component {
                     <Divider />
                     <Button onClick={this.checkout}>下单</Button>
                 </Drawer>
-                <Login open={this.state.openLogin} onClose={() => this.handleLoginClose()} login={() => this.login()} />
+                <Login open={this.state.openLogin} onClose={() => this.handleLoginClose()} login={() => this.props.login()} />
                 <Register
                     open={this.state.openRegister}
                     onClose={() => this.handleRegisterClose()}
-                    register={() => this.register()}
+                    register={() => this.props.register()}
+                />
+                <SearchOrders
+                    open={this.state.openSearch}
+                    onClose={() => this.handleSearchClose()}
+                    search={() => this.search()}
                 />
             </div>
         );
