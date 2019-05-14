@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
+import CreateIcon from '@material-ui/icons/Create';
 
 const styles = {
     avatar: {
@@ -70,21 +71,32 @@ class BookInformation extends Component{
         this.props.onClose(this.props.selectedValue);
     };
 
+    onClickEdit = (key) => {
+        let value = prompt("请输入要改成的" + key, this.props[key]);
+        this.props.updateBook(this.props.bookID, key, value);
+    };
+
     render(){
         const { classes, onClose, selectedValue, ...other } = this.props;
         return(
             <Dialog onClose={this.handleClose} aria-labelledby="customized-dialog-title" {...other}>
-                <DialogTitle id="simple-dialog-title">{this.props.title}</DialogTitle>
+                <DialogTitle id="simple-dialog-title">
+                    {this.props.title}
+                    <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("title")}><CreateIcon/></Button>
+                </DialogTitle>
                 <DialogContent>
                     <img src={this.props.img} alt={this.props.title} style={this.props.imgStyle} />
                     <Typography gutterBottom>
                         作者: {this.props.author}
+                        <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("author")}><CreateIcon/></Button>
                     </Typography>
                     <Typography gutterBottom>
                         价格: {this.props.price}
+                        <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("price")}><CreateIcon/></Button>
                     </Typography>
                     <Typography gutterBottom>
                         isbn: {this.props.isbn}
+                        <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("isbn")}><CreateIcon/></Button>
                     </Typography>
                     <Typography gutterBottom>
                         内容: {this.props.detail}
@@ -92,6 +104,7 @@ class BookInformation extends Component{
                     <DialogActions>
                         <Typography>
                             库存: {this.props.stock}
+                            <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("stock")}><CreateIcon/></Button>
                         </Typography>
                         <Button onClick={this.handleAdd} color="primary">
                             加入购物车

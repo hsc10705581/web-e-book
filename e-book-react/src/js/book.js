@@ -2,18 +2,21 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import BookInformation from './bookInformation';
+import AddBookDialog from './addBookDialog';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import VoiceIcon from '@material-ui/icons/KeyboardVoice'
+import AddIcon from '@material-ui/icons/Add'
 import Paper from '@material-ui/core/Paper';
 
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import {Button} from "@material-ui/core";
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const styles = theme => ({
     root: {
@@ -202,23 +205,38 @@ const choices = ['书名', '作者', 'isbn']; //可供搜索的选项
 
 let defaultOpen = [false, false, false, false, false];
 
+var hide = {
+    display: "none",
+};
+
+var show = {
+    display: "inline",
+};
+
 class Book extends Component{
     //{ classes } = props;
     state = {
         open: defaultOpen,
+        addBookDialogStyle: false,
         bookList: [],
         choice: "书名",
         listOpen: false,
         bookInfo: [],
         user: null,
+        role: null,
     };
 
     componentWillReceiveProps(nextProps) {
-        if (this.state.bookInfo !== nextProps.bookInfo || this.state.user !== nextProps.user) {
+        if (this.state.bookInfo !== nextProps.bookInfo) {
             this.setState({
                 bookInfo: nextProps.bookInfo,
                 bookList: nextProps.bookInfo,
+            })
+        }
+        if (this.state.user !== nextProps.user || this.state.role !== nextProps.role) {
+            this.setState({
                 user: nextProps.user,
+                role: nextProps.role,
             })
         }
     }
@@ -229,19 +247,16 @@ class Book extends Component{
             bookList: bookInfo
         })
     }
-
     handleClickOpen(bookId){
         defaultOpen[bookId] = true;
         this.setState({
             open: defaultOpen
         });
     };
-
     handleClose(bookId){
         defaultOpen[bookId] = false;
         this.setState({ open: defaultOpen, });
     };
-
     handleChange(){
         let input = document.getElementById('search').value.toLowerCase();
         let newList = this.state.bookInfo.filter( (item) => {
@@ -258,18 +273,25 @@ class Book extends Component{
             bookList: newList,
         })
     };
-
     handleListChange = event => {
         this.setState({ [event.target.name]: event.target.value });
     };
-
     handleListClose = () => {
         this.setState({ listOpen: false });
     };
-
     handleListOpen = () => {
         this.setState({ listOpen: true });
     };
+    handleAddBookDialogOpen = () => {
+        this.setState({
+            addBookDialogStyle: true,
+        })
+    };
+    handleAddBookDialogClose = () => {
+        this.setState({
+            addBookDialogStyle: false,
+        })
+    }
 
     render(){
         const { classes } = this.props;
@@ -302,11 +324,33 @@ class Book extends Component{
                         <SearchIcon />
                     </IconButton>
                     <Divider className={classes.divider} />
-                    <IconButton color="primary" className={classes.iconButton} aria-label="Directions">
-                        <VoiceIcon />
+                    <IconButton style={this.state.role === "ADMIN" ? show : hide} onClick={() => this.handleAddBookDialogOpen()} color="primary" className={classes.iconButton} aria-label="Directions">
+                        <AddIcon />
                     </IconButton>
                 </Paper>
                 <div className={classes.bookRoot}>
+                    <div style={this.state.role === "ADMIN" ? show : hide}>
+                        <ButtonBase
+                            focusRipple
+                            className={classes.image}
+                            focusVisibleClassName={classes.focusVisible}
+                            style={bottomStyle}
+                            onClick={() => this.handleAddBookDialogOpen()}
+                        >
+                            <span className={classes.imageBackdrop} />
+                            <span className={classes.imageButton}>
+                            <Typography
+                                component="span"
+                                variant="subtitle1"
+                                color="inherit"
+                                className={classes.imageTitle}
+                            >
+                                添加书本
+                                <span className={classes.imageMarked} />
+                            </Typography>
+                        </span>
+                        </ButtonBase>
+                    </div>
                     {this.state.bookList.map(book => (
                         <div key={book.id}>
                             <ButtonBase
@@ -317,26 +361,33 @@ class Book extends Component{
                                 style={bottomStyle}
                                 onClick={() => this.handleClickOpen(book.id)}
                             >
-                                    <span
-                                        className={classes.imageSrc}
-                                        style={{
-                                            backgroundImage: `url(${book.img})`,
-                                        }}
-                                    />
+                                <span
+                                    className={classes.imageSrc}
+                                    style={{
+                                        backgroundImage: `url(${book.img})`,
+                                    }}
+                                />
                                 <span className={classes.imageBackdrop} />
                                 <span className={classes.imageButton}>
-                                        <Typography
-                                            component="span"
-                                            variant="subtitle1"
-                                            color="inherit"
-                                            className={classes.imageTitle}
-                                        >
-                                            {book.title}
-                                            <span className={classes.imageMarked} />
-                                        </Typography>
-                                    </span>
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        color="inherit"
+                                        className={classes.imageTitle}
+                                    >
+                                        {book.title}
+                                        <span className={classes.imageMarked} />
+                                    </Typography>
+                                </span>
                             </ButtonBase>
-                            <Typography>库存:{book.stock}</Typography>
+                            <Typography>库存:{book.stock}
+                                <Button
+                                    style={this.state.role === "ADMIN" ? show : hide}
+                                    onClick={() => this.props.deleteBook(book.id)}
+                                >
+                                    <DeleteIcon/>
+                                </Button>
+                            </Typography>
                             <BookInformation
                                 selectedValue={this.state.selectedValue}
                                 open={this.state.open[book.id]}
@@ -352,10 +403,17 @@ class Book extends Component{
                                 bookID={book.id}
                                 user={this.state.user}
                                 addABookToCart={(bookID, stock) => this.props.addABookToCart(bookID, stock)}
+                                adminstyle={this.state.role === "ADMIN" ? show : hide}
+                                updateBook={(bookID, key, value) => this.props.updateBook(bookID, key, value)}
                             />
                         </div>
                     ))}
                 </div>
+                <AddBookDialog
+                    open={this.state.addBookDialogStyle}
+                    onClose={() => this.handleAddBookDialogClose()}
+                    addBookToDB={() => this.props.addBookToDB()}
+                />
             </div>
         )
     }

@@ -6,6 +6,7 @@ import Book from "./js/book";
 import Introduction from './js/introuction';
 import Order from './js/order';
 import User from './js/user';
+import {arrayOf} from "prop-types";
 
 var sectionStyle = {
     width: "100%",
@@ -46,7 +47,6 @@ class App extends Component {
         orderStyle: hide,
         userStyle: hide,
         backStyle: sectionStyle,
-        responseData: null,
         bookInfo: [],
         username: null,
         role: null,
@@ -110,32 +110,14 @@ class App extends Component {
     }
 
     getBooks(){
-        $.get("http://localhost:8080/books", function (data) {
-            this.setState({
-                responseData: JSON.parse(data)
-            })
+        $.get(
+            "http://localhost:8080/book/getAll",
+            function (data) {
+                let bookInfo = JSON.parse(data);
+                this.setState({
+                    bookInfo: bookInfo
+                })
         }.bind(this));
-        for (let x in this.state.responseData){
-            let data = JSON.parse(this.state.responseData[x]);
-            let dir = {};
-            dir["title"] = data[0];
-            dir["author"] = data[1];
-            dir["translator"] = data[2];
-            dir["grade"] = data[3];
-            dir["press"] = data[4];
-            dir["date"] = data[5];
-            dir["numOfPeople"] = data[6];
-            dir["price"] = data[7];
-            dir["isbn"] = data[8];
-            dir["detail"] = data[9];
-            dir["id"] = data[10];
-            dir["stock"] = data[11];
-            let cp = this.state.bookInfo;
-            cp[x] = dir;
-            this.setState({
-                bookInfo: cp,
-            })
-        }
     }
     login = () => {
         let saveDataAry = {
@@ -202,6 +184,28 @@ class App extends Component {
             role: null,
         });
     };
+    addBookToDB = () => {
+        let saveDataAry = {
+            title: document.getElementById("bookTitle").value,
+            author: document.getElementById("bookAuthor").value,
+            translator: document.getElementById("bookTranslator").value,
+            grade: 0,
+            press: document.getElementById("bookPress").value,
+            date: document.getElementById("bookDate").value,
+            numOfPeople: 0,
+            price: document.getElementById("bookPrice").value,
+            isbn: document.getElementById("bookIsbn").value,
+            introduction: document.getElementById("bookIntroduction").value,
+            stock: document.getElementById("bookStock").value,
+        };
+        console.log(saveDataAry);
+        $.post(
+            "http://localhost:8080/book/add",
+            {values: JSON.stringify(saveDataAry)},
+            function (data){
+
+            });
+    }
     addABookToCart(bookID, stock) {
         if(this.state.username === null)
             alert("要登录才能把书本加入购物车哦");
@@ -243,6 +247,45 @@ class App extends Component {
         });
         this.refreshShoppingCartOpen();
     };
+    updateBook(bookID, key, value) {
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: "http://localhost:8080/book/update/" + key + "?id=" + bookID + "&" + key + "=" + value,
+            success: function (data) {
+
+            }
+        });
+        let index = 0;
+        for(; index < this.state.bookInfo.length; index++){
+            if(this.state.bookInfo[index]["id"] === bookID)
+                break;
+        }
+        let newBookInfo = this.state.bookInfo;
+        newBookInfo[index][key] = value;
+        this.setState({
+            bookInfo: newBookInfo,
+        })
+    };
+    deleteBook(bookID) {
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: "http://localhost:8080/book/delete?id=" + bookID,
+            success: function (data) {
+
+            }
+        });
+        let index = 0;
+        for(; index < this.state.bookInfo.length; index++){
+            if(this.state.bookInfo[index]["id"] === bookID)
+                break;
+        }
+        let newBookInfo = this.state.bookInfo.slice(0, index).concat(this.state.bookInfo.slice(index+1));
+        this.setState({
+            bookInfo: newBookInfo,
+        })
+    }
     checkout = () => {
         let saveDataAry = {
             cartProducts: this.state.cartProducts,
@@ -327,6 +370,10 @@ class App extends Component {
                             user={this.state.username}
                             ref="book"
                             addABookToCart={(bookID, stock) => this.addABookToCart(bookID, stock)}
+                            updateBook={(bookID, key, value) => this.updateBook(bookID, key, value)}
+                            role={this.state.role}
+                            deleteBook={(bookID) => this.deleteBook(bookID)}
+                            addBookToDB={() => this.addBookToDB()}
                         />
                     </div>
                     <div id="order" style={this.state.orderStyle}>
