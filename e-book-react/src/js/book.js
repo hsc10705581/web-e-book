@@ -291,7 +291,7 @@ class Book extends Component{
         this.setState({
             addBookDialogStyle: false,
         })
-    }
+    };
 
     render(){
         const { classes } = this.props;
@@ -402,7 +402,7 @@ class Book extends Component{
                                 imgStyle={bookStyle}
                                 bookID={book.id}
                                 user={this.state.user}
-                                addABookToCart={(bookID, stock) => this.props.addABookToCart(bookID, stock)}
+                                addABookToCart={(amount, bookID, stock) => this.props.addABookToCart(amount, bookID, stock)}
                                 adminstyle={this.state.role === "ADMIN" ? show : hide}
                                 updateBook={(bookID, key, value) => this.props.updateBook(bookID, key, value)}
                             />

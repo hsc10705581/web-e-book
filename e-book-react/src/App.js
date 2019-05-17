@@ -7,6 +7,7 @@ import Introduction from './js/introuction';
 import Order from './js/order';
 import User from './js/user';
 import {arrayOf} from "prop-types";
+import {JSS} from "jss";
 
 var sectionStyle = {
     width: "100%",
@@ -70,6 +71,11 @@ class App extends Component {
                         cartProducts: cartProducts,
                     })
                 }
+                else{
+                    this.setState({
+                        cartProducts: [],
+                    })
+                }
             }.bind(this));
     }
 
@@ -99,6 +105,15 @@ class App extends Component {
             userStyle: hide,
         });
     }
+    showAdminAllOrders() {
+        this.getAllOrders();
+        this.setState({
+            introductionStyle: hide,
+            booksStyle: hide,
+            orderStyle: show,
+            userStyle: hide,
+        });
+    }
     showUsers() {
         this.refreshUsers();
         this.setState({
@@ -119,6 +134,17 @@ class App extends Component {
                 })
         }.bind(this));
     }
+    getAllOrders = () => {
+        $.get(
+            "http://localhost:8080/order/getAll",
+            function(data) {
+                let orderList = JSON.parse(data);
+                this.setState({
+                    orderList: orderList
+                })
+            }.bind(this)
+        )
+    };
     login = () => {
         let saveDataAry = {
             username: document.getElementById("loginName").value,
@@ -205,7 +231,7 @@ class App extends Component {
             function (data){
 
             });
-    }
+    };
     addABookToCart(bookID, stock) {
         if(this.state.username === null)
             alert("要登录才能把书本加入购物车哦");
@@ -228,24 +254,30 @@ class App extends Component {
         }
         this.refreshShoppingCartOpen();
     }
-    bookAddRemove(amount, bookID) {
+    bookAddRemove(amount, bookID, stock) {
         let saveDataAry = {
             username: this.state.username,
             b_ID: bookID,
             amount: amount
         };
-        $.ajax({
-            type: "POST",
-            async: false,
-            url: "http://localhost:8080/addProduct",
-            data: {values: JSON.stringify(saveDataAry)},
-            success: function (data){
-                let array = JSON.parse(data);
-                if(array["success"] === false)
-                    alert(array["alert"]);
-            }
-        });
-        this.refreshShoppingCartOpen();
+        if(this.state.username === null)
+            alert("要登录才能把书本加入购物车哦");
+        else if(stock === 0)
+            alert("这本书的库存为0哦");
+        else{
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "http://localhost:8080/addProduct",
+                data: {values: JSON.stringify(saveDataAry)},
+                success: function (data){
+                    let array = JSON.parse(data);
+                    if(array["success"] === false)
+                        alert(array["alert"]);
+                }
+            });
+            this.refreshShoppingCartOpen();
+        }
     };
     updateBook(bookID, key, value) {
         $.ajax({
@@ -309,8 +341,10 @@ class App extends Component {
                 let orders = JSON.parse(data);
                 if(orders !== false)
                 {
+                    let newOrderList = [];
+                    newOrderList[0] = orders;
                     this.setState({
-                        orderList: orders,
+                        orderList: newOrderList,
                     })
                 }
             }.bind(this));
@@ -353,23 +387,25 @@ class App extends Component {
                         username={this.state.username}
                         role={this.state.role}
 
-                        bookAddRemove={(amount, bookID) => this.bookAddRemove(amount, bookID)}
+                        bookAddRemove={(amount, bookID, stock) => this.bookAddRemove(amount, bookID, stock)}
                         checkout={() => this.checkout()}
 
                         showOrders={() => this.showOrders()}
                         showUsers={() => this.showUsers()}
+                        showAdminAllOrders={() => this.showAdminAllOrders()}
                     />
                 </div>
                 <div>
                     <div id="introduction" style={this.state.introductionStyle}>
                         <Introduction/>
+
                     </div>
                     <div id="books" style={this.state.booksStyle}>
                         <Book
                             bookInfo={this.state.bookInfo}
                             user={this.state.username}
                             ref="book"
-                            addABookToCart={(bookID, stock) => this.addABookToCart(bookID, stock)}
+                            addABookToCart={(amount, bookID, stock) => this.bookAddRemove(amount, bookID, stock)}
                             updateBook={(bookID, key, value) => this.updateBook(bookID, key, value)}
                             role={this.state.role}
                             deleteBook={(bookID) => this.deleteBook(bookID)}

@@ -214,7 +214,6 @@ class Navigation extends React.Component {
             alert("您的购物车是空的哦");
         else{
             this.props.checkout();
-            this.showUnfinishedOrders();
         }
     };
     search = () => {
@@ -229,6 +228,10 @@ class Navigation extends React.Component {
 
     showAllUsers = () => {
         this.props.showUsers();
+    };
+
+    showAdminAllOrders = () => {
+        this.props.showAdminAllOrders()
     };
 
     render() {
@@ -308,6 +311,9 @@ class Navigation extends React.Component {
                         <ListItemLink onClick={this.showAllUsers} style={this.state.isAdmin}>
                             <ListItemText primary="管理所有用户"/>
                         </ListItemLink>
+                        <ListItemLink onClick={this.showAdminAllOrders} style={this.state.isAdmin}>
+                            <ListItemText primary="管理所有订单"/>
+                        </ListItemLink>
                     </List>
                 </Drawer>
                 <Drawer
@@ -333,7 +339,7 @@ class Navigation extends React.Component {
                                     price={product.price}
                                     amount={product.amount}
                                     b_ID={product.b_ID}
-                                    bookAddRemove={(amount, bookID) => this.props.bookAddRemove(amount, bookID)}
+                                    bookAddRemove={(amount, bookID, stock) => this.props.bookAddRemove(amount, bookID, stock)}
                                 />
                             </ListItem>
                         ))}

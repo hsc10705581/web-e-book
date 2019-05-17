@@ -47,15 +47,15 @@ class Product extends React.Component{
     }
 
     bookAdd = () => {
-        let num = this.state.amount + 1;
+        //let num = this.state.amount + 1;
         //this.setState({amount: num,});
-        this.props.bookAddRemove(1, this.props.b_ID);
+        this.props.bookAddRemove(1, this.props.b_ID, null);
     };
 
     bookRemove = () => {
-        let num = this.state.amount - 1;
+        //let num = this.state.amount - 1;
         //this.setState({amount: num,});
-        this.props.bookAddRemove(-1, this.props.b_ID);
+        this.props.bookAddRemove(-1, this.props.b_ID, null);
     };
 
     render() {

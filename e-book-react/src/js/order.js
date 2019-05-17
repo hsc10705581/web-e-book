@@ -226,6 +226,37 @@ class Order extends Component{
         this.props.refreshOrders();
     };
 
+    renderOrderList = (orderList, index) => {
+        if(orderList !== null)
+        {
+            return (
+                <div key={index}>
+                    <Toolbar>
+                        <Typography variant="h6" color="inherit">
+                            {orderList[0][0]["username"]}的所有订单
+                        </Typography>
+                    </Toolbar>
+                    {orderList.map((order, index) => this.renderAOrder(order, index))}
+                </div>
+            )
+        }
+    };
+
+    renderAOrder = (order, index) => {
+        if(order !== null)
+        {
+            return (
+                <div key={index}>
+                    <OrderDetail
+                        order={order}
+                        payout={(o_ID) => this.payout(o_ID)}
+                        classes={this.props.classes}
+                    />
+                </div>
+            )
+        }
+    };
+
     render() {
         const { classes } = this.props;
         return (
@@ -263,14 +294,7 @@ class Order extends Component{
                     </IconButton>
                 </Paper>
                 <Paper className={classes.tablePaper}>
-                    {this.state.chosenOrderList.map(order => (
-                        <OrderDetail
-                            key={order[0]["id"]}
-                            order={order}
-                            payout={(o_ID) => this.payout(o_ID)}
-                            classes={this.props.classes}
-                        />
-                    ))}
+                    {this.state.chosenOrderList.map((orderList, index) => this.renderOrderList(orderList, index))}
                 </Paper>
             </div>
         )

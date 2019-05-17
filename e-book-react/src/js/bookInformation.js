@@ -64,7 +64,7 @@ class BookInformation extends Component{
 
     handleAdd = () => {
         this.handleClose();
-        this.props.addABookToCart(this.props.bookID, this.props.stock);
+        this.props.addABookToCart(null, this.props.bookID, this.props.stock);
     };
 
     handleClose = () => {
