@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import './App.css';
-import Navigation from "./js/navigation";
+import '../App.css';
+import Navigation from "./user/navigation";
 import $ from 'jquery';
-import Book from "./js/book";
-import Introduction from './js/introuction';
-import Order from './js/order';
-import User from './js/user';
-import {arrayOf} from "prop-types";
-import {JSS} from "jss";
+import Book from "./user/book";
+import Introduction from './user/introuction';
+import Order from './user/order';
+import User from './admin/user';
 
 var sectionStyle = {
     width: "100%",
@@ -54,6 +52,7 @@ class App extends Component {
         cartProducts: [],
         orderList: [],
         userList: [],
+        expensesMap: [],
     };
 
     refreshShoppingCartOpen(){
@@ -123,6 +122,12 @@ class App extends Component {
             userStyle: show,
         })
     }
+    showExpenses() {
+        this.getExpenses();
+        this.setState({
+
+        })
+    }
 
     getBooks(){
         $.get(
@@ -134,6 +139,17 @@ class App extends Component {
                 })
         }.bind(this));
     }
+    getExpenses = () => {
+        $.get(
+            "http://localhost:8080/order/get/expenses",
+            function (data) {
+                let expensesMap = JSON.parse(data);
+                this.setState({
+                    expensesMap: expensesMap,
+                })
+            }.bind(this)
+        )
+    };
     getAllOrders = () => {
         $.get(
             "http://localhost:8080/order/getAll",
@@ -375,8 +391,6 @@ class App extends Component {
             <div className="App" style={this.state.backStyle}>
                 <div id="navigation">
                     <Navigation
-                        showIntro={() => this.showIntroduction()}
-                        showBooks={() => this.showBooks()}
                         changeStyle={() => this.changeStyle()}
                         refreshShoppingCartOpen={() => this.refreshShoppingCartOpen()}
                         cartProducts={this.state.cartProducts}
@@ -390,9 +404,12 @@ class App extends Component {
                         bookAddRemove={(amount, bookID, stock) => this.bookAddRemove(amount, bookID, stock)}
                         checkout={() => this.checkout()}
 
+                        showIntro={() => this.showIntroduction()}
+                        showBooks={() => this.showBooks()}
                         showOrders={() => this.showOrders()}
                         showUsers={() => this.showUsers()}
                         showAdminAllOrders={() => this.showAdminAllOrders()}
+                        showExpenses={() => this.showExpenses()}
                     />
                 </div>
                 <div>

@@ -21,7 +21,6 @@ import HighLight from '@material-ui/icons/Highlight';
 import Login from './login';
 import Register from './register';
 import Product from './product';
-import SearchOrders from './searchOrders';
 
 const drawerWidth = 240;
 
@@ -113,7 +112,6 @@ class Navigation extends React.Component {
         openDrawer: false,
         openLogin: false,
         openRegister: false,
-        openSearch: false,
         showShoppingCart: hide,
         showLogin: show,
         topBarStyle: {backgroundColor: "#3f51b5", color: "white"},
@@ -164,13 +162,6 @@ class Navigation extends React.Component {
         }
     }
 
-    showBooks = () => {
-        this.props.showBooks();
-    };
-    showIntro = () => {
-        this.props.showIntro();
-    };
-
     handleShoppingCartOpen = () => {
         this.props.refreshShoppingCartOpen();
         this.setState({openShoppingCart: true});
@@ -196,12 +187,6 @@ class Navigation extends React.Component {
     handleRegisterClose = () => {
         this.setState({openRegister: false});
     };
-    handleSearchOpen = () => {
-        this.setState({openSearch: true});
-    };
-    handleSearchClose = () => {
-        this.setState({openSearch: false});
-    };
     changeStyle = () => {
         this.props.changeStyle();
         tmp++;
@@ -225,13 +210,20 @@ class Navigation extends React.Component {
     showAllOrders = () => {
         this.props.showOrders();
     };
-
     showAllUsers = () => {
         this.props.showUsers();
     };
-
     showAdminAllOrders = () => {
-        this.props.showAdminAllOrders()
+        this.props.showAdminAllOrders();
+    };
+    showExpenses = () => {
+        this.props.showExpenses();
+    };
+    showBooks = () => {
+        this.props.showBooks();
+    };
+    showIntro = () => {
+        this.props.showIntro();
     };
 
     render() {
@@ -314,6 +306,9 @@ class Navigation extends React.Component {
                         <ListItemLink onClick={this.showAdminAllOrders} style={this.state.isAdmin}>
                             <ListItemText primary="管理所有订单"/>
                         </ListItemLink>
+                        <ListItemLink onClick={this.showExpenses} style={this.state.isAdmin}>
+                            <ListItemText primary="查看用户的累计消费情况"/>
+                        </ListItemLink>
                     </List>
                 </Drawer>
                 <Drawer
@@ -352,11 +347,6 @@ class Navigation extends React.Component {
                     open={this.state.openRegister}
                     onClose={() => this.handleRegisterClose()}
                     register={() => this.props.register()}
-                />
-                <SearchOrders
-                    open={this.state.openSearch}
-                    onClose={() => this.handleSearchClose()}
-                    search={() => this.search()}
                 />
             </div>
         );

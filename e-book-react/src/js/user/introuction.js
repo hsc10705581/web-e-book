@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
-import '../css/introduction.css';
+import '../../css/introduction.css';
 class Introduction extends Component{
     render() {
         return(
             <div className="body">
                 <div className="title">
                     <div className="icon">
-                        <img src={require("../images/book.png")} alt=""/>
+                        <img src={require("../../images/book.png")} alt=""/>
                     </div>
                     <div className="name">
                         <p className="header">e-book</p>
                     </div>
                     <div className="icon">
-                        <img src={require("../images/buy.png")} alt=""/>
+                        <img src={require("../../images/buy.png")} alt=""/>
                     </div>
                 </div>
                 <div className="introduction">

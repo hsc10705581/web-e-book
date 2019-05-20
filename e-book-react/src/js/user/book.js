@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import BookInformation from './bookInformation';
-import AddBookDialog from './addBookDialog';
+import AddBookDialog from '../admin/addBookDialog';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';

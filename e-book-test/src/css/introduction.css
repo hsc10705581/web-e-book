@@ -1,0 +1,45 @@
+.body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    margin-top: 116px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+div.icon{
+    height: 128px;
+    width: 128px;
+}
+
+div.name{
+    height: 18vh;
+    width: 30vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div.introduction{
+    height: 25vh;
+    width: 75vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+p.header{
+    font-size: 64px;
+    font-weight: bold;
+}
+
+p.font{
+    font-size: 32px;
+}
