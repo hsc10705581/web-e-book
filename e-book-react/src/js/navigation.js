@@ -18,9 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import HighLight from '@material-ui/icons/Highlight';
-import Login from '../user/login';
-import Register from '../user/register';
-import Product from '../user/product';
+import Login from './user/login';
+import Register from './user/register';
+import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -112,7 +112,7 @@ class Navigation extends React.Component {
         openDrawer: false,
         openLogin: false,
         openRegister: false,
-        showShoppingCart: hide,
+        isLogin: false,
         showLogin: show,
         topBarStyle: {backgroundColor: "#3f51b5", color: "white"},
         username: null,
@@ -120,6 +120,26 @@ class Navigation extends React.Component {
         cartProducts: [],
         totalPrice: 0,
         isAdmin: hide,
+    };
+
+    getCartProduct = () => {
+        this.props.getCartProduct();
+    };
+
+    refreshUsers = () => {
+        this.props.refreshUsers();
+    };
+
+    refreshOrders = () => {
+        this.props.refreshOrders();
+    };
+
+    refreshAllOrders = () => {
+        this.props.refreshAllOrders();
+    };
+
+    logout = () => {
+        this.props.logout();
     };
 
     componentWillReceiveProps(nextProps) {
@@ -134,7 +154,7 @@ class Navigation extends React.Component {
                 this.setState({
                     username: nextProps.username,
                     role: nextProps.role,
-                    showShoppingCart: show,
+                    isLogin: true,
                     showLogin: hide,
                 })
             }
@@ -143,7 +163,7 @@ class Navigation extends React.Component {
                 this.setState({
                     username: null,
                     role: null,
-                    showShoppingCart: hide,
+                    isLogin: false,
                     showLogin: show,
                 })
             }
@@ -162,13 +182,6 @@ class Navigation extends React.Component {
         }
     }
 
-    handleShoppingCartOpen = () => {
-        this.props.refreshShoppingCartOpen();
-        this.setState({openShoppingCart: true});
-    };
-    handleShoppingCartClose = () => {
-        this.setState({openShoppingCart: false})
-    };
     handleDrawerOpen = () => {
         this.setState({ openDrawer: true });
     };
@@ -193,37 +206,6 @@ class Navigation extends React.Component {
         this.setState({
             topBarStyle: (tmp % 2) === 1 ? {backgroundColor: "#f5f5f5", color: "black"} : {backgroundColor: "#3f51b5", color: "white"},
         })
-    };
-    checkout = () => {
-        if(this.state.cartProducts.length === 0)
-            alert("您的购物车是空的哦");
-        else{
-            this.props.checkout();
-        }
-    };
-    search = () => {
-        let beginDate = document.getElementById("beginDate").value;
-        let endDate = document.getElementById("endDate").value;
-        window.location.href = "http://localhost:8080/getSpecialOrders1/" + this.state.username + "/" + beginDate + "/" + endDate;
-    };
-
-    showAllOrders = () => {
-        this.props.showOrders();
-    };
-    showAllUsers = () => {
-        this.props.showUsers();
-    };
-    showAdminAllOrders = () => {
-        this.props.showAdminAllOrders();
-    };
-    showExpenses = () => {
-        this.props.showExpenses();
-    };
-    showBooks = () => {
-        this.props.showBooks();
-    };
-    showIntro = () => {
-        this.props.showIntro();
     };
 
     render() {
@@ -259,14 +241,16 @@ class Navigation extends React.Component {
                             <Button color="inherit" onClick={this.handleRegisterOpen}>注册</Button>
                             <Button color="inherit" onClick={this.handleLoginOpen}>登录</Button>
                         </div>
-                        <div style={this.state.showShoppingCart}>
+                        <div style={this.state.isLogin ? show : hide}>
                             <Typography variant="h6" color="inherit" className={classes.grow} noWrap>
                                 {this.state.username} 您的权限: {this.state.role}
                             </Typography>
                             <Button color="inherit" onClick={() => this.props.logout()}>登出</Button>
-                            <IconButton className={classes.button} aria-label="Delete" color="inherit" onClick={this.handleShoppingCartOpen}>
-                                <ShoppingCart />
-                            </IconButton>
+                            <Link to={global.url.cart}>
+                                <IconButton className={classes.button} aria-label="Delete" color="inherit" onClick={this.getCartProduct}>
+                                    <ShoppingCart />
+                                </IconButton>
+                            </Link>
                         </div>
                     </Toolbar>
                 </AppBar>
@@ -286,62 +270,47 @@ class Navigation extends React.Component {
                     </div>
                     <Divider />
                     <List>
-                        <ListItemLink onClick={this.showIntro}>
-                            <ListItemText primary="首页"/>
-                        </ListItemLink>
-                        <ListItemLink>
-                            <ListItemText primary="推荐列表"/>
-                        </ListItemLink>
-                        <ListItemLink onClick={this.showBooks}>
-                            <ListItemText primary="全部书籍"/>
-                        </ListItemLink>
+                        <Link to={global.url.home}>
+                            <ListItemLink>
+                                <ListItemText primary="首页"/>
+                            </ListItemLink>
+                        </Link>
+                        <Link to={global.url.book}>
+                            <ListItemLink>
+                                <ListItemText primary="全部书籍"/>
+                            </ListItemLink>
+                        </Link>
                         <Divider/>
-                        <ListItemLink onClick={this.showAllOrders} style={this.state.showShoppingCart}>
-                            <ListItemText primary="查看所有订单"/>
-                        </ListItemLink>
+                        <Link to={global.url.order}>
+                            <ListItemLink style={this.state.isLogin ? show : hide} onClick={this.refreshOrders}>
+                                <ListItemText primary="我的所有订单"/>
+                            </ListItemLink>
+                        </Link>
+                        <Link to={global.url.cart}>
+                            <ListItemLink style={this.state.isLogin ? show : hide} onClick={this.getCartProduct}>
+                                <ListItemText primary="我的购物车"/>
+                            </ListItemLink>
+                        </Link>
                         <Divider/>
-                        <ListItemLink onClick={this.showAllUsers} style={this.state.isAdmin}>
-                            <ListItemText primary="管理所有用户"/>
-                        </ListItemLink>
-                        <ListItemLink onClick={this.showAdminAllOrders} style={this.state.isAdmin}>
-                            <ListItemText primary="管理所有订单"/>
-                        </ListItemLink>
-                        <ListItemLink onClick={this.showExpenses} style={this.state.isAdmin}>
-                            <ListItemText primary="查看用户的累计消费情况"/>
-                        </ListItemLink>
+                        <Link to={global.url.user}>
+                            <ListItemLink style={this.state.isAdmin} onClick={this.refreshUsers}>
+                                <ListItemText primary="管理所有用户"/>
+                            </ListItemLink>
+                        </Link>
+                        <Link to={global.url.allOrders}>
+                            <ListItemLink style={this.state.isAdmin} onClick={this.refreshAllOrders}>
+                                <ListItemText primary="管理所有订单"/>
+                            </ListItemLink>
+                        </Link>
                     </List>
                 </Drawer>
-                <Drawer
-                    className={classes.drawer}
-                    variant="persistent"
-                    anchor="right"
-                    open={this.state.openShoppingCart}
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}
+                <main
+                    className={classNames(classes.content, {
+                        [classes.contentShift]: openDrawer,
+                    })}
                 >
-                    <div className={classes.drawerHeader}>
-                        <IconButton onClick={this.handleShoppingCartClose}>
-                            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                        </IconButton>
-                    </div>
-                    <Divider />
-                    <List>
-                        {this.state.cartProducts.map((product) => (
-                            <ListItem>
-                                <Product
-                                    title={product.title}
-                                    price={product.price}
-                                    amount={product.amount}
-                                    b_ID={product.b_ID}
-                                    bookAddRemove={(amount, bookID, stock) => this.props.bookAddRemove(amount, bookID, stock)}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-                    <Divider />
-                    <Button onClick={this.checkout}>下单</Button>
-                </Drawer>
+                    {this.props.children}
+                </main>
                 <Login open={this.state.openLogin} onClose={() => this.handleLoginClose()} login={() => this.props.login()} />
                 <Register
                     open={this.state.openRegister}

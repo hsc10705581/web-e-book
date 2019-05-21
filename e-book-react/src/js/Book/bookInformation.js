@@ -68,11 +68,12 @@ class BookInformation extends Component{
     };
 
     handleClose = () => {
-        this.props.onClose(this.props.selectedValue);
+        this.props.onClose(this.props.bookID);
     };
 
     onClickEdit = (key) => {
         let value = prompt("请输入要改成的" + key, this.props[key]);
+        console.log(value);
         this.props.updateBook(this.props.bookID, key, value);
     };
 

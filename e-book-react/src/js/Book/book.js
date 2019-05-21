@@ -17,6 +17,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import {Button} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
+import $ from "jquery";
 
 const styles = theme => ({
     root: {
@@ -37,7 +38,6 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'center',
         width: '80%',
-        marginTop: '50px',
     },
     image: {
         position: 'relative',
@@ -122,25 +122,6 @@ const styles = theme => ({
     },
 });
 
-/*
-const styles = theme => ({
-    root: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        overflow: 'hidden',
-        marginLeft: '240px',
-    },
-    fab: {
-        margin: theme.spacing.unit * 2,
-    },
-    absolute: {
-        position: 'absolute',
-        bottom: theme.spacing.unit * 2,
-        right: theme.spacing.unit * 3,
-    },
-});
-*/
-
 let bottomStyle= {
     height: '240px',
     width: '180px',
@@ -153,57 +134,9 @@ let bookStyle= {
     width: '180px',
 };
 
-/*const bookInfo = [
-    {
-        id: 0,
-        img: require('../images/book1.jpg'),
-        title: '游戏设计艺术（第2版）',
-        author: '[美] Jesse Schell',
-        price: '168.00元',
-        isbn: '9787121282669',
-        detail: '《游戏设计艺术（第2版）》主要内容包括：游戏的体验、构成游戏的元素、元素支撑的主题、游戏的改进、游戏机制、游戏中的角色、游戏设计团队、如何开发好的游戏、如何推销游戏、设计者的责任等。',
-    },
-    {
-        id: 1,
-        img: require('../images/book2.jpg'),
-        title: '游戏设计梦工厂',
-        author: 'Tracy Fullerton（特雷西•富勒顿）',
-        price: '119.00元',
-        isbn: '9787121284663',
-        detail: '从了解游戏设计师的角色及游戏的结构开始，到游戏的正规、戏剧和动态元素，再到游戏的原型制作和游戏测试，直到游戏的打磨、发行和游戏制作，覆盖游戏设计的方方面面，适合不同阶段的游戏设计师。',
-    },
-    {
-        id: 2,
-        img: require('../images/book3.jpg'),
-        title: '游戏的人',
-        author: '[荷] 约翰·赫伊津哈',
-        price: '28.00元',
-        isbn: '9787536050686',
-        detail: '本书研究游戏在人类进化和文化发展中的重要作用。强调指出：游戏是文化本质的、固有的、不可或缺的、决非偶然的成分。',
-    },
-    {
-        id: 3,
-        img: require('../images/book4.jpg'),
-        title: '有限与无限的游戏',
-        author: '[美]詹姆斯·卡斯',
-        price: '35.00元',
-        isbn: '9787121215698',
-        detail: '在这本书中，詹姆斯·卡斯向我们展示了世界上两种类型的「游戏」：「有限的游戏」和「无限的游戏」。',
-    },
-    {
-        id: 4,
-        img: require('../images/book5.jpg'),
-        title: '游戏改变世界',
-        author: '[美] 简·麦戈尼格尔',
-        price: '59.90元',
-        isbn: '9787213049422',
-        detail: '作者在书中用大量事例告诉我们，游戏击中了人类幸福的核心，提供了令人愉悦的奖励、刺激性的挑战和宏大的胜利，而这些都是现实世界十分匮乏的。她的研究表明，我们可以借助游戏的力量，让生活变得像游戏一样精彩。',
-    },
-];*/
-
 const choices = ['书名', '作者', 'isbn']; //可供搜索的选项
 
-let defaultOpen = [false, false, false, false, false];
+let defaultOpen = [];
 
 var hide = {
     display: "none",
@@ -227,12 +160,6 @@ class Book extends Component{
     };
 
     componentWillReceiveProps(nextProps) {
-        if (this.state.bookInfo !== nextProps.bookInfo) {
-            this.setState({
-                bookInfo: nextProps.bookInfo,
-                bookList: nextProps.bookInfo,
-            })
-        }
         if (this.state.user !== nextProps.user || this.state.role !== nextProps.role) {
             this.setState({
                 user: nextProps.user,
@@ -241,20 +168,122 @@ class Book extends Component{
         }
     }
 
+    componentDidMount() {
+        $.get(
+            "/book/all",
+            function (data) {
+                let defaultOpen = new Array(data.length);
+                for(let i = 0; i < data.length; i++)
+                    defaultOpen[i] = false;
+                this.setState({
+                    bookInfo: data,
+                    bookList: data,
+                    open: defaultOpen
+                });
+            }.bind(this));
+    };
+    addBookToDB = () => {
+        let saveDataAry = {
+            title: document.getElementById("bookTitle").value,
+            author: document.getElementById("bookAuthor").value,
+            translator: document.getElementById("bookTranslator").value,
+            grade: 0,
+            press: document.getElementById("bookPress").value,
+            date: document.getElementById("bookDate").value,
+            numOfPeople: 0,
+            price: document.getElementById("bookPrice").value,
+            isbn: document.getElementById("bookIsbn").value,
+            introduction: document.getElementById("bookIntroduction").value,
+            stock: document.getElementById("bookStock").value,
+        };
+        $.ajax({
+            url: "/book/add",
+            type: "POST",
+            contentType: "application/json",
+            body: JSON.stringify(saveDataAry),
+            success: function (data) {
+
+            }
+        });
+    };
+    addABookToCart = (amount, bookID, stock) => {
+        let saveDataAry = {
+            username: this.state.user,
+            b_ID: bookID,
+            amount: amount
+        };
+        if(this.state.user === null)
+            alert("要登录才能把书本加入购物车哦");
+        else if(stock === 0)
+            alert("这本书的库存为0哦");
+        else{
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/cart/add",
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
+                success: function (data){
+                    if(data["success"] === false)
+                        alert(data["alert"]);
+                }
+            });
+        }
+    };
+    updateBook = (bookID, key, value) => {
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: "/book/update/" + key + "?id=" + bookID + "&" + key + "=" + value,
+            success: function (data) {
+
+            }
+        });
+        let index = 0;
+        for(; index < this.state.bookInfo.length; index++){
+            if(this.state.bookInfo[index]["b_ID"] === bookID)
+                break;
+        }
+        let newBookInfo = this.state.bookInfo;
+        newBookInfo[index][key] = value;
+        this.setState({
+            bookInfo: newBookInfo,
+        })
+    };
+    deleteBook = (bookID) => {
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: "/book/delete?id=" + bookID,
+            success: function (data) {
+
+            }
+        });
+        let index = 0;
+        for(; index < this.state.bookInfo.length; index++){
+            if(this.state.bookInfo[index]["b_ID"] === bookID)
+                break;
+        }
+        let newBookInfo = this.state.bookInfo.slice(0, index).concat(this.state.bookInfo.slice(index+1));
+        this.setState({
+            bookInfo: newBookInfo,
+        })
+    };
+
     update(bookInfo){
         this.setState({
             bookInfo: bookInfo,
             bookList: bookInfo
         })
     }
-    handleClickOpen(bookId){
+    handleClickOpen = (bookId) => {
         defaultOpen[bookId] = true;
         this.setState({
             open: defaultOpen
         });
     };
-    handleClose(bookId){
-        defaultOpen[bookId] = false;
+    handleClose = (bookID) =>{
+        defaultOpen[bookID] = false;
         this.setState({ open: defaultOpen, });
     };
     handleChange(){
@@ -383,27 +412,27 @@ class Book extends Component{
                             <Typography>库存:{book["stock"]}
                                 <Button
                                     style={this.state.role === "ADMIN" ? show : hide}
-                                    onClick={() => this.props.deleteBook(book["b_ID"])}
+                                    onClick={() => this.deleteBook(book["b_ID"])}
                                 >
                                     <DeleteIcon/>
                                 </Button>
                             </Typography>
                             <BookInformation
                                 open={this.state.open[book["b_ID"]]}
-                                onClose={(bookId) => this.handleClose(bookId)}
+                                onClose={(bookID) => this.handleClose(bookID)}
                                 img={book["img"]}
                                 title={book["title"]}
                                 author={book["author"]}
                                 price={book["price"]}
                                 isbn={book["isbn"]}
-                                detail={book["detail"]}
+                                detail={book["introduction"]}
                                 stock={book["stock"]}
                                 imgStyle={bookStyle}
                                 bookID={book["b_ID"]}
                                 user={this.state.user}
-                                addABookToCart={(amount, bookID, stock) => this.props.addABookToCart(amount, bookID, stock)}
+                                addABookToCart={(amount, bookID, stock) => this.addABookToCart(amount, bookID, stock)}
                                 adminstyle={this.state.role === "ADMIN" ? show : hide}
-                                updateBook={(bookID, key, value) => this.props.updateBook(bookID, key, value)}
+                                updateBook={(bookID, key, value) => this.updateBook(bookID, key, value)}
                             />
                         </div>
                     ))}
@@ -411,7 +440,7 @@ class Book extends Component{
                 <AddBookDialog
                     open={this.state.addBookDialogStyle}
                     onClose={() => this.handleAddBookDialogClose()}
-                    addBookToDB={() => this.props.addBookToDB()}
+                    addBookToDB={() => this.addBookToDB()}
                 />
             </div>
         )

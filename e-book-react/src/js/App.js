@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import '../App.css';
-import Navigation from "./Home/navigation";
+import Navigation from "./navigation";
 import $ from 'jquery';
+import "./config";
+
 import Book from "./Book/book";
-import Introduction from './Home/introuction';
+import Introduction from './introuction';
 import Order from './user/order';
 import User from './admin/user';
+import Cart from './Cart/Cart';
 
 var sectionStyle = {
     width: "100%",
@@ -23,130 +27,22 @@ var otherSectionStyle = {
     backgroundColor: "#B0B0B0",
     backgroundSize: "100% 100%",
 };
-
-var hide = {
-    display: "none",
-};
-
-var show = {
-    display: "inline"
-};
-
 let tmp = 0;
 
 class App extends Component {
 
-    componentDidMount() {
-        this.getBooks()
-    }
-
     state = {
-        introductionStyle: show,
-        booksStyle: hide,
-        orderStyle: hide,
-        userStyle: hide,
         backStyle: sectionStyle,
-        bookInfo: [],
         username: null,
         role: null,
+        bookInfo: [],
+
         cartProducts: [],
         orderList: [],
         userList: [],
         expensesMap: [],
     };
 
-    refreshShoppingCartOpen(){
-        $.get(
-            "http://localhost:8080/shoppingCart/" + this.state.username,
-            function (data) {
-                this.setState({
-                    cartProducts: data,
-                })
-            }.bind(this));
-    }
-
-    showIntroduction(){
-        this.setState({
-            introductionStyle: show,
-            booksStyle: hide,
-            orderStyle: hide,
-            userStyle: hide,
-        })
-    }
-    showBooks(){
-        this.getBooks();
-        this.setState({
-            introductionStyle: hide,
-            booksStyle: show,
-            orderStyle: hide,
-            userStyle: hide,
-        });
-    }
-    showOrders() {
-        this.refreshOrders();
-        this.setState({
-            introductionStyle: hide,
-            booksStyle: hide,
-            orderStyle: show,
-            userStyle: hide,
-        });
-    }
-    showAdminAllOrders() {
-        this.getAllOrders();
-        this.setState({
-            introductionStyle: hide,
-            booksStyle: hide,
-            orderStyle: show,
-            userStyle: hide,
-        });
-    }
-    showUsers() {
-        this.refreshUsers();
-        this.setState({
-            introductionStyle: hide,
-            booksStyle: hide,
-            orderStyle: hide,
-            userStyle: show,
-        })
-    }
-    showExpenses() {
-        this.getExpenses();
-        this.setState({
-
-        })
-    }
-
-    getBooks(){
-        $.get(
-            "http://localhost:8080/book/all",
-            function (data) {
-                this.setState({
-                    bookInfo: data
-                })
-        }.bind(this));
-    }
-    getExpenses = () => {
-        $.get(
-            "http://localhost:8080/order/get/expenses",
-            function (data) {
-                let expensesMap = JSON.parse(data);
-                this.setState({
-                    expensesMap: expensesMap,
-                })
-            }.bind(this)
-        )
-    };
-    getAllOrders = () => {
-        $.get(
-            "http://localhost:8080/order/getAll",
-            function(data) {
-                let orderList = JSON.parse(data);
-                this.setState({
-                    orderList: orderList
-                })
-            }.bind(this)
-        )
-    };
     login = () => {
         let saveDataAry = {
             username: document.getElementById("loginName").value,
@@ -181,14 +77,16 @@ class App extends Component {
             password: document.getElementById("registerPassword1").value,
             email: document.getElementById("registerEmail").value,
         };
+        console.log(saveDataAry);
         if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
             alert("请输入用户名或密码");
         else{
             $.ajax({
-                url: "http://localhost:8080/user/add",
+                url: "/user/add",
                 type: "POST",
-                contentType: "application/json",
-                body: JSON.stringify(saveDataAry),
+                dataType: "json",
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
                 success: function (data) {
                     if (data["success"] === false) {
                         alert(data["alert"]);
@@ -209,93 +107,20 @@ class App extends Component {
             role: null,
         });
     };
-    addBookToDB = () => {
-        let saveDataAry = {
-            title: document.getElementById("bookTitle").value,
-            author: document.getElementById("bookAuthor").value,
-            translator: document.getElementById("bookTranslator").value,
-            grade: 0,
-            press: document.getElementById("bookPress").value,
-            date: document.getElementById("bookDate").value,
-            numOfPeople: 0,
-            price: document.getElementById("bookPrice").value,
-            isbn: document.getElementById("bookIsbn").value,
-            introduction: document.getElementById("bookIntroduction").value,
-            stock: document.getElementById("bookStock").value,
-        };
-        $.ajax({
-            url: "http://localhost:8080/book/add",
-            type: "POST",
-            contentType: "application/json",
-            body: JSON.stringify(saveDataAry),
-            success: function (data) {
 
-            }
-        });
-    };
-    bookAddRemove(amount, bookID, stock) {
-        let saveDataAry = {
-            username: this.state.username,
-            b_ID: bookID,
-            amount: amount
-        };
-        if(this.state.username === null)
-            alert("要登录才能把书本加入购物车哦");
-        else if(stock === 0)
-            alert("这本书的库存为0哦");
+    getCartProduct = () => {
+        if (this.state.username === null)
+            alert("你需要登录才能查看购物车");
         else{
-            $.ajax({
-                type: "POST",
-                async: false,
-                url: "http://localhost:8080/cart/add",
-                data: JSON.stringify(saveDataAry),
-                success: function (data){
-                    if(data["success"] === false)
-                        alert(data["alert"]);
-                }
-            });
-            this.refreshShoppingCartOpen();
+            $.get(
+                "/cart/all/" + this.state.username,
+                function (data) {
+                    this.setState({
+                        cartProducts: data,
+                    })
+                }.bind(this));
         }
     };
-    updateBook(bookID, key, value) {
-        $.ajax({
-            type: "GET",
-            async: false,
-            url: "http://localhost:8080/book/update/" + key + "?id=" + bookID + "&" + key + "=" + value,
-            success: function (data) {
-
-            }
-        });
-        let index = 0;
-        for(; index < this.state.bookInfo.length; index++){
-            if(this.state.bookInfo[index]["id"] === bookID)
-                break;
-        }
-        let newBookInfo = this.state.bookInfo;
-        newBookInfo[index][key] = value;
-        this.setState({
-            bookInfo: newBookInfo,
-        })
-    };
-    deleteBook(bookID) {
-        $.ajax({
-            type: "GET",
-            async: false,
-            url: "http://localhost:8080/book/delete?id=" + bookID,
-            success: function (data) {
-
-            }
-        });
-        let index = 0;
-        for(; index < this.state.bookInfo.length; index++){
-            if(this.state.bookInfo[index]["id"] === bookID)
-                break;
-        }
-        let newBookInfo = this.state.bookInfo.slice(0, index).concat(this.state.bookInfo.slice(index+1));
-        this.setState({
-            bookInfo: newBookInfo,
-        })
-    }
     checkout = () => {
         let saveDataAry = {
             cartProducts: this.state.cartProducts,
@@ -304,41 +129,42 @@ class App extends Component {
         $.ajax({
             type: "POST",
             async: false,
-            url: "http://localhost:8080/cart/checkout",
+            url: "/cart/checkout",
+            dataType: "json",
             data: JSON.stringify(saveDataAry),
+            headers: {'Content-Type': 'application/json'},
             success: function (data){
                 alert(data);
             }
         });
     };
-    refreshOrders = () => {
-        $.post(
-            "http://localhost:8080/getOrders/" + this.state.username,
-            {},
+
+    refreshAllOrders = () => {
+        $.get(
+            "/order/getAll",
             function (data) {
-                let orders = JSON.parse(data);
-                if(orders !== false)
-                {
-                    let newOrderList = [];
-                    newOrderList[0] = orders;
-                    this.setState({
-                        orderList: newOrderList,
-                    })
-                }
+                this.setState({
+                    orderList: data,
+                })
+            }.bind(this)
+        )
+    };
+    refreshOrders = () => {
+        $.get(
+            "/order/getAll/" + this.state.username,
+            function (data) {
+                this.setState({
+                    orderList: data,
+                })
             }.bind(this));
     };
     refreshUsers = () => {
-        $.post(
-            "http://localhost:8080/getUsers",
-            {},
+        $.get(
+            "/user/getAll",
             function (data) {
-                let users = JSON.parse(data);
-                if(users !== false)
-                {
-                    this.setState({
-                        userList: users,
-                    })
-                }
+                this.setState({
+                    userList: data,
+                })
             }.bind(this));
     };
     changeStyle(){
@@ -350,61 +176,63 @@ class App extends Component {
 
     render() {
         return (
-            <div className="App" style={this.state.backStyle}>
-                <div id="navigation">
-                    <Navigation
-                        changeStyle={() => this.changeStyle()}
-                        refreshShoppingCartOpen={() => this.refreshShoppingCartOpen()}
-                        cartProducts={this.state.cartProducts}
-
-                        login={() => this.login()}
-                        register={() => this.register()}
-                        logout={() => this.logout()}
-                        username={this.state.username}
-                        role={this.state.role}
-
-                        bookAddRemove={(amount, bookID, stock) => this.bookAddRemove(amount, bookID, stock)}
-                        checkout={() => this.checkout()}
-
-                        showIntro={() => this.showIntroduction()}
-                        showBooks={() => this.showBooks()}
-                        showOrders={() => this.showOrders()}
-                        showUsers={() => this.showUsers()}
-                        showAdminAllOrders={() => this.showAdminAllOrders()}
-                        showExpenses={() => this.showExpenses()}
-                    />
-                </div>
-                <div>
-                    <div id="introduction" style={this.state.introductionStyle}>
-                        <Introduction/>
-
-                    </div>
-                    <div id="books" style={this.state.booksStyle}>
-                        <Book
-                            bookInfo={this.state.bookInfo}
-                            user={this.state.username}
-                            ref="book"
-                            addABookToCart={(amount, bookID, stock) => this.bookAddRemove(amount, bookID, stock)}
-                            updateBook={(bookID, key, value) => this.updateBook(bookID, key, value)}
-                            role={this.state.role}
-                            deleteBook={(bookID) => this.deleteBook(bookID)}
-                            addBookToDB={() => this.addBookToDB()}
-                        />
-                    </div>
-                    <div id="order" style={this.state.orderStyle}>
-                        <Order
-                            orderList={this.state.orderList}
-                            refreshOrders={() => this.refreshOrders()}
-                        />
-                    </div>
-                    <div id="Users" style={this.state.userStyle}>
-                        <User
-                            userList={this.state.userList}
+            <Router>
+                <div className="App" style={this.state.backStyle}>
+                    <div id="navigation">
+                        <Navigation
+                            changeStyle={() => this.changeStyle()}
+                            getCartProduct={() => this.getCartProduct()}
                             refreshUsers={() => this.refreshUsers()}
+                            refreshOrders={() => this.refreshOrders()}
+                            refreshAllOrders={() => this.refreshAllOrders()}
+
+                            login={() => this.login()}
+                            register={() => this.register()}
+                            logout={() => this.logout()}
+                            username={this.state.username}
+                            role={this.state.role}
                         />
                     </div>
+                    <div>
+                        <Switch>
+                            <Route path={global.url.home} exact component={Introduction} />
+                            <Route path={global.url.book} exact render={() =>
+                                <Book
+                                    bookInfo={this.state.bookInfo}
+                                    user={this.state.username}
+                                    role={this.state.role}
+                                />}
+                            />
+                            <Route path={global.url.cart} exact render={() =>
+                                <Cart
+                                    cartProducts={this.state.cartProducts}
+                                    getCartProduct={() => this.getCartProduct()}
+                                    username={this.state.username}
+                                    checkout={() => this.checkout()}
+                                />}
+                            />
+                            <Route path={global.url.order} exact render={() =>
+                                <Order
+                                    orderList={this.state.orderList}
+                                    refreshOrders={() => this.refreshOrders()}
+                                />}
+                            />
+                            <Route path={global.url.user} exact render={() =>
+                                <User
+                                    userList={this.state.userList}
+                                    refreshUsers={() => this.refreshUsers()}
+                                />}
+                            />
+                            <Route path={global.url.allOrders} exact render={() =>
+                                <Order
+                                    orderList={this.state.orderList}
+                                    refreshOrders={() => this.refreshAllOrders()}
+                                />}
+                            />
+                        </Switch>
+                    </div>
                 </div>
-            </div>
+            </Router>
         );
     }
 }

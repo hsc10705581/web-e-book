@@ -108,7 +108,7 @@ class User extends Component{
         $.ajax({
             type: "POST",
             async: false,
-            url: "http://localhost:8080/user/banned/" + u_ID,
+            url: "/user/banned/" + u_ID,
             data: {},
             success: function (data) {
 
@@ -139,7 +139,7 @@ class User extends Component{
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {this.props.userList.map(user => (
+                            {this.state.userList.map(user => (
                                 <UserDetail
                                     key={user["u_ID"]}
                                     id={user["u_ID"]}

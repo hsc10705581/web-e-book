@@ -35,8 +35,7 @@ const styles = theme => ({
         padding: '2px 4px',
         display: 'flex',
         alignItems: 'center',
-        width: '80%',
-        marginTop: '50px',
+        width: '80%'
     },
 
     input: {
@@ -80,7 +79,7 @@ const choices = ['未完成的订单', '已完成的订单', '全部订单'];
 class OrderDetail extends Component{
 
     payout = () => {
-        this.props.payout(this.props.order[0]["id"])
+        this.props.payout(this.props.order["o_ID"])
     };
 
     render() {
@@ -89,7 +88,7 @@ class OrderDetail extends Component{
             <div>
                 <Toolbar>
                     <Typography variant="h6" color="inherit">
-                        {this.props.order[0]["finished"] ? "已完成的" : "未完成的"}订单号:{this.props.order[0]["id"]}
+                        {this.props.order["finished"] ? "已完成的" : "未完成的"}订单号:{this.props.order["o_ID"]}
                     </Typography>
                 </Toolbar>
                 <Table className={classes.table}>
@@ -102,18 +101,24 @@ class OrderDetail extends Component{
                             <TableCell align="left">数量</TableCell>
                             <TableCell align="left">总价</TableCell>
                         </TableRow>
-                        {this.props.order.slice(1).map((orderItem, index) => (
+                        {this.props.order["orderItemObjects"].map((orderItem, index) => (
                             <TableRow key={index}>
                                 <TableCell align="left">{orderItem["title"]}</TableCell>
                                 <TableCell align="left">{orderItem["price"]}</TableCell>
                                 <TableCell align="left">{orderItem["amount"]}</TableCell>
-                                <TableCell align="left">{orderItem["totalPrice"]}</TableCell>
+                                <TableCell align="left"/>
                             </TableRow>
                         ))}
+                        <TableRow>
+                            <TableCell align="left"/>
+                            <TableCell align="left"/>
+                            <TableCell align="left"/>
+                            <TableCell align="left">{this.props.order["totalPrice"]}</TableCell>
+                        </TableRow>
                     </TableBody>
                 </Table>
                 <Divider />
-                <Button style={this.props.order[0]["finished"] ? hide : show} onClick={this.payout}>确认支付</Button>
+                <Button style={this.props.order["finished"] ? hide : show} onClick={this.payout}>确认支付</Button>
                 <Divider />
             </div>
         )
@@ -150,9 +155,9 @@ class Order extends Component{
         if(beginDate === "" && endDate === ""){
             newList = this.state.orderList.filter( (order) => {
                 if(this.state.choice === '未完成的订单')
-                    return !order[0]["finished"];
+                    return !order["finished"];
                 else if(this.state.choice === '已完成的订单')
-                    return order[0]["finished"];
+                    return order["finished"];
                 else if(this.state.choice === '全部订单')
                     return true;
                 else
@@ -162,11 +167,11 @@ class Order extends Component{
         else if(beginDate === "" && endDate !== ""){
             newList = this.state.orderList.filter( (order) => {
                 if(this.state.choice === '未完成的订单')
-                    return !order[0]["finished"] && new Date(endDate) > new Date(order[0]["date"]);
+                    return !order["finished"] && new Date(endDate) > new Date(order["date"]);
                 else if(this.state.choice === '已完成的订单')
-                    return order[0]["finished"] && new Date(endDate) > new Date(order[0]["date"]);
+                    return order["finished"] && new Date(endDate) > new Date(order["date"]);
                 else if(this.state.choice === '全部订单')
-                    return new Date(endDate) > new Date(order[0]["date"]);
+                    return new Date(endDate) > new Date(order["date"]);
                 else
                     return false;
             });
@@ -174,11 +179,11 @@ class Order extends Component{
         else if(beginDate !== "" && endDate === ""){
             newList = this.state.orderList.filter( (order) => {
                 if(this.state.choice === '未完成的订单')
-                    return !order[0]["finished"] && new Date(beginDate) < new Date(order[0]["date"]);
+                    return !order["finished"] && new Date(beginDate) < new Date(order["date"]);
                 else if(this.state.choice === '已完成的订单')
-                    return order[0]["finished"] && new Date(beginDate) < new Date(order[0]["date"]);
+                    return order["finished"] && new Date(beginDate) < new Date(order["date"]);
                 else if(this.state.choice === '全部订单')
-                    return new Date(beginDate) < new Date(order[0]["date"]);
+                    return new Date(beginDate) < new Date(order["date"]);
                 else
                     return false;
             });
@@ -186,11 +191,11 @@ class Order extends Component{
         else{
             newList = this.state.orderList.filter( (order) => {
                 if(this.state.choice === '未完成的订单')
-                    return !order[0]["finished"] && new Date(endDate) > new Date(order[0]["date"]) && new Date(beginDate) < new Date(order[0]["date"]);
+                    return !order["finished"] && new Date(endDate) > new Date(order["date"]) && new Date(beginDate) < new Date(order["date"]);
                 else if(this.state.choice === '已完成的订单')
-                    return order[0]["finished"] && new Date(endDate) > new Date(order[0]["date"]) && new Date(beginDate) < new Date(order[0]["date"]);
+                    return order["finished"] && new Date(endDate) > new Date(order["date"]) && new Date(beginDate) < new Date(order["date"]);
                 else if(this.state.choice === '全部订单')
-                    return new Date(endDate) > new Date(order[0]["date"]) && new Date(beginDate) < new Date(order[0]["date"]);
+                    return new Date(endDate) > new Date(order["date"]) && new Date(beginDate) < new Date(order["date"]);
                 else
                     return false;
             });
@@ -217,8 +222,7 @@ class Order extends Component{
         $.ajax({
             type: "POST",
             async: false,
-            url: "http://localhost:8080/finished/" + o_ID,
-            data: {},
+            url: "/finished/" + o_ID,
             success: function (data) {
 
             }
@@ -233,10 +237,10 @@ class Order extends Component{
                 <div key={index}>
                     <Toolbar>
                         <Typography variant="h6" color="inherit">
-                            {orderList[0][0]["username"]}的所有订单
+                            {orderList["username"]}的订单
                         </Typography>
                     </Toolbar>
-                    {orderList.map((order, index) => this.renderAOrder(order, index))}
+                    {this.renderAOrder(orderList, index)}
                 </div>
             )
         }
