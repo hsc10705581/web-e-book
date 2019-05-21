@@ -18,9 +18,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import HighLight from '@material-ui/icons/Highlight';
-import Login from './login';
-import Register from './register';
-import Product from './product';
+import Login from '../user/login';
+import Register from '../user/register';
+import Product from '../user/product';
 
 const drawerWidth = 240;
 

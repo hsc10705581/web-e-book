@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import '../App.css';
-import Navigation from "./user/navigation";
+import Navigation from "./Home/navigation";
 import $ from 'jquery';
-import Book from "./user/book";
-import Introduction from './user/introuction';
+import Book from "./Book/book";
+import Introduction from './Home/introuction';
 import Order from './user/order';
 import User from './admin/user';
 
@@ -56,25 +56,12 @@ class App extends Component {
     };
 
     refreshShoppingCartOpen(){
-        let saveDataAry = {
-            username: this.state.username,
-        };
-        $.post(
-            "http://localhost:8080/shoppingCart",
-            {values: JSON.stringify(saveDataAry)},
+        $.get(
+            "http://localhost:8080/shoppingCart/" + this.state.username,
             function (data) {
-                let cartProducts = JSON.parse(data);
-                if(cartProducts !== false)
-                {
-                    this.setState({
-                        cartProducts: cartProducts,
-                    })
-                }
-                else{
-                    this.setState({
-                        cartProducts: [],
-                    })
-                }
+                this.setState({
+                    cartProducts: data,
+                })
             }.bind(this));
     }
 
@@ -131,11 +118,10 @@ class App extends Component {
 
     getBooks(){
         $.get(
-            "http://localhost:8080/book/getAll",
+            "http://localhost:8080/book/all",
             function (data) {
-                let bookInfo = JSON.parse(data);
                 this.setState({
-                    bookInfo: bookInfo
+                    bookInfo: data
                 })
         }.bind(this));
     }
@@ -169,25 +155,24 @@ class App extends Component {
         if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
             alert("请输入用户名或密码");
         else{
-            $.post(
-                "http://localhost:8080/userLogin",
-                {values: JSON.stringify(saveDataAry)},
-                function (data){
-                    let array = JSON.parse(data);
-                    if(array[0] === false)
-                    {
-                        alert(array[1]);
-                    }
-                    else
-                    {
-                        alert(array[1]);
+            $.ajax({
+                url: "/user/login",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
+                success: function (data) {
+                    if (data["success"] === false) {
+                        alert(data["alert"]);
+                    } else {
+                        alert(data["alert"]);
                         this.setState({
-                            username: array[2],
-                            role: array[3],
+                            username: data["username"],
+                            role: data["role"],
                         });
                     }
                 }.bind(this)
-            );
+            });
         }
     };
     register = () => {
@@ -199,25 +184,23 @@ class App extends Component {
         if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
             alert("请输入用户名或密码");
         else{
-            $.post(
-                "http://localhost:8080/userRegister",
-                {values: JSON.stringify(saveDataAry)},
-                function (data){
-                    let array = JSON.parse(data);
-                    if(array[0] === false)
-                    {
-                        alert(array[1]);
-                    }
-                    else
-                    {
-                        alert(array[1]);
+            $.ajax({
+                url: "http://localhost:8080/user/add",
+                type: "POST",
+                contentType: "application/json",
+                body: JSON.stringify(saveDataAry),
+                success: function (data) {
+                    if (data["success"] === false) {
+                        alert(data["alert"]);
+                    } else {
+                        alert(data["alert"]);
                         this.setState({
-                            username: array[2],
-                            role: array[3],
+                            username: data["username"],
+                            role: data["role"],
                         });
                     }
                 }.bind(this)
-            );
+            });
         }
     };
     logout = () => {
@@ -240,36 +223,16 @@ class App extends Component {
             introduction: document.getElementById("bookIntroduction").value,
             stock: document.getElementById("bookStock").value,
         };
-        console.log(saveDataAry);
-        $.post(
-            "http://localhost:8080/book/add",
-            {values: JSON.stringify(saveDataAry)},
-            function (data){
+        $.ajax({
+            url: "http://localhost:8080/book/add",
+            type: "POST",
+            contentType: "application/json",
+            body: JSON.stringify(saveDataAry),
+            success: function (data) {
 
-            });
+            }
+        });
     };
-    addABookToCart(bookID, stock) {
-        if(this.state.username === null)
-            alert("要登录才能把书本加入购物车哦");
-        else if(stock === 0)
-            alert("这本书的库存为0哦");
-        else
-        {
-            let saveDataAry = {
-                username: this.state.username,
-                b_ID: bookID,
-            };
-            console.log(saveDataAry);
-            $.post(
-                "http://localhost:8080/addProduct",
-                {values: JSON.stringify(saveDataAry)},
-                function (data){
-                    let array = JSON.parse(data);
-                    console.log(array);
-                });
-        }
-        this.refreshShoppingCartOpen();
-    }
     bookAddRemove(amount, bookID, stock) {
         let saveDataAry = {
             username: this.state.username,
@@ -284,12 +247,11 @@ class App extends Component {
             $.ajax({
                 type: "POST",
                 async: false,
-                url: "http://localhost:8080/addProduct",
-                data: {values: JSON.stringify(saveDataAry)},
+                url: "http://localhost:8080/cart/add",
+                data: JSON.stringify(saveDataAry),
                 success: function (data){
-                    let array = JSON.parse(data);
-                    if(array["success"] === false)
-                        alert(array["alert"]);
+                    if(data["success"] === false)
+                        alert(data["alert"]);
                 }
             });
             this.refreshShoppingCartOpen();
@@ -342,8 +304,8 @@ class App extends Component {
         $.ajax({
             type: "POST",
             async: false,
-            url: "http://localhost:8080/checkout",
-            data: {values: JSON.stringify(saveDataAry)},
+            url: "http://localhost:8080/cart/checkout",
+            data: JSON.stringify(saveDataAry),
             success: function (data){
                 alert(data);
             }

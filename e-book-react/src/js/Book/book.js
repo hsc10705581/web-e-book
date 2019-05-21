@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import BookInformation from './bookInformation';
-import AddBookDialog from '../admin/addBookDialog';
+import AddBookDialog from './addBookDialog';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
@@ -352,55 +352,54 @@ class Book extends Component{
                         </ButtonBase>
                     </div>
                     {this.state.bookList.map(book => (
-                        <div key={book.id}>
+                        <div key={book["b_ID"]}>
                             <ButtonBase
                                 focusRipple
-                                key={book.title}
+                                key={book["title"]}
                                 className={classes.image}
                                 focusVisibleClassName={classes.focusVisible}
                                 style={bottomStyle}
-                                onClick={() => this.handleClickOpen(book.id)}
+                                onClick={() => this.handleClickOpen(book["b_ID"])}
                             >
-                                <span
-                                    className={classes.imageSrc}
-                                    style={{
-                                        backgroundImage: `url(${book.img})`,
-                                    }}
-                                />
+                                    <span
+                                        className={classes.imageSrc}
+                                        style={{
+                                            backgroundImage: `url(${book["img"]})`,
+                                        }}
+                                    />
                                 <span className={classes.imageBackdrop} />
                                 <span className={classes.imageButton}>
-                                    <Typography
-                                        component="span"
-                                        variant="subtitle1"
-                                        color="inherit"
-                                        className={classes.imageTitle}
-                                    >
-                                        {book.title}
-                                        <span className={classes.imageMarked} />
-                                    </Typography>
-                                </span>
+                                        <Typography
+                                            component="span"
+                                            variant="subtitle1"
+                                            color="inherit"
+                                            className={classes.imageTitle}
+                                        >
+                                            {book["title"]}
+                                            <span className={classes.imageMarked} />
+                                        </Typography>
+                                    </span>
                             </ButtonBase>
-                            <Typography>库存:{book.stock}
+                            <Typography>库存:{book["stock"]}
                                 <Button
                                     style={this.state.role === "ADMIN" ? show : hide}
-                                    onClick={() => this.props.deleteBook(book.id)}
+                                    onClick={() => this.props.deleteBook(book["b_ID"])}
                                 >
                                     <DeleteIcon/>
                                 </Button>
                             </Typography>
                             <BookInformation
-                                selectedValue={this.state.selectedValue}
-                                open={this.state.open[book.id]}
-                                onClose={() => this.handleClose(book.id)}
-                                img={book.img}
-                                title={book.title}
-                                author={book.author}
-                                price={book.price}
-                                isbn={book.isbn}
-                                detail={book.detail}
-                                stock={book.stock}
+                                open={this.state.open[book["b_ID"]]}
+                                onClose={(bookId) => this.handleClose(bookId)}
+                                img={book["img"]}
+                                title={book["title"]}
+                                author={book["author"]}
+                                price={book["price"]}
+                                isbn={book["isbn"]}
+                                detail={book["detail"]}
+                                stock={book["stock"]}
                                 imgStyle={bookStyle}
-                                bookID={book.id}
+                                bookID={book["b_ID"]}
                                 user={this.state.user}
                                 addABookToCart={(amount, bookID, stock) => this.props.addABookToCart(amount, bookID, stock)}
                                 adminstyle={this.state.role === "ADMIN" ? show : hide}

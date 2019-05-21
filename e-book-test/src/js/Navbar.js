@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -18,9 +19,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import HighLight from '@material-ui/icons/Highlight';
-//import Login from './login';
-//import Register from './register';
-//import Product from './product';
+import $ from 'jquery';
+
+import Login from './User/Login';
+import Register from './User/Register';
 
 const drawerWidth = 240;
 
@@ -112,63 +114,96 @@ class Navigation extends React.Component {
         openDrawer: false,
         openLogin: false,
         openRegister: false,
-        showShoppingCart: hide,
-        showLogin: show,
+
         topBarStyle: {backgroundColor: "#3f51b5", color: "white"},
-        username: null,
-        role: null,
         cartProducts: [],
         totalPrice: 0,
         isAdmin: hide,
+
+        isLogin: false,
+        username: null,
+        role: null,
     };
 
-    componentWillReceiveProps(nextProps) {
-        if (this.state.cartProducts !== nextProps.cartProducts) {
-            this.setState({
-                cartProducts: nextProps.cartProducts,
-            })
-        }
-        if (this.state.username !== nextProps.username) {
-            if (nextProps.username !== null)
-            {
-                this.setState({
-                    username: nextProps.username,
-                    role: nextProps.role,
-                    showShoppingCart: show,
-                    showLogin: hide,
-                })
-            }
-            else
-            {
-                this.setState({
-                    username: null,
-                    role: null,
-                    showShoppingCart: hide,
-                    showLogin: show,
-                })
-            }
-        }
-        if (nextProps.role === "ADMIN")
-        {
-            this.setState({
-                isAdmin: show,
-            })
-        }
-        else
-        {
-            this.setState({
-                isAdmin: hide,
-            })
-        }
+    componentDidMount() {
+        this.setState({
+            username: global.configuration.user,
+            role: global.configuration.role,
+        })
     }
 
-    handleShoppingCartOpen = () => {
-        this.props.refreshShoppingCartOpen();
-        this.setState({openShoppingCart: true});
+    logout = () => {
+        this.setState({
+            username: null,
+            role: null,
+            isLogin: false,
+        });
+        global.configuration.user = null;
+        global.configuration.role = null;
     };
-    handleShoppingCartClose = () => {
-        this.setState({openShoppingCart: false})
+    register = () => {
+        let saveDataAry = {
+            username: document.getElementById("registerName").value,
+            password: document.getElementById("registerPassword1").value,
+            email: document.getElementById("registerEmail").value,
+        };
+        if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
+            alert("请输入用户名或密码");
+        else{
+            $.ajax({
+                url: "http://localhost:8080/user/add",
+                type: "POST",
+                contentType: "application/json",
+                body: JSON.stringify(saveDataAry),
+                success: function (data) {
+                    if (data["success"] === false) {
+                        alert(data["alert"]);
+                    } else {
+                        alert(data["alert"]);
+                        this.setState({
+                            isLogin: true,
+                            username: data["username"],
+                            role: data["role"],
+                        });
+                        global.configuration.user = data["username"];
+                        global.configuration.role = data["role"];
+                    }
+                }.bind(this)
+            });
+        }
     };
+    login = () => {
+        let saveDataAry = {
+            username: document.getElementById("loginName").value,
+            password: document.getElementById("loginPassword").value,
+        };
+        if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
+            alert("请输入用户名或密码");
+        else{
+            $.ajax({
+                url: "/user/login",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
+                success: function (data) {
+                    if (data["success"] === false) {
+                        alert(data["alert"]);
+                    } else {
+                        alert(data["alert"]);
+                        this.setState({
+                            isLogin: true,
+                            username: data["username"],
+                            role: data["role"],
+                        });
+                        global.configuration.user = data["username"];
+                        global.configuration.role = data["role"];
+                    }
+                }.bind(this)
+            });
+        }
+    };
+
     handleDrawerOpen = () => {
         this.setState({ openDrawer: true });
     };
@@ -188,42 +223,10 @@ class Navigation extends React.Component {
         this.setState({openRegister: false});
     };
     changeStyle = () => {
-        this.props.changeStyle();
         tmp++;
         this.setState({
             topBarStyle: (tmp % 2) === 1 ? {backgroundColor: "#f5f5f5", color: "black"} : {backgroundColor: "#3f51b5", color: "white"},
         })
-    };
-    checkout = () => {
-        if(this.state.cartProducts.length === 0)
-            alert("您的购物车是空的哦");
-        else{
-            this.props.checkout();
-        }
-    };
-    search = () => {
-        let beginDate = document.getElementById("beginDate").value;
-        let endDate = document.getElementById("endDate").value;
-        window.location.href = "http://localhost:8080/getSpecialOrders1/" + this.state.username + "/" + beginDate + "/" + endDate;
-    };
-
-    showAllOrders = () => {
-        this.props.showOrders();
-    };
-    showAllUsers = () => {
-        this.props.showUsers();
-    };
-    showAdminAllOrders = () => {
-        this.props.showAdminAllOrders();
-    };
-    showExpenses = () => {
-        this.props.showExpenses();
-    };
-    showBooks = () => {
-        this.props.showBooks();
-    };
-    showIntro = () => {
-        this.props.showIntro();
     };
 
     render() {
@@ -255,18 +258,20 @@ class Navigation extends React.Component {
                         <IconButton onClick={this.changeStyle}>
                             <HighLight />
                         </IconButton>
-                        <div style={this.state.showLogin}>
+                        <div style={this.state.isLogin ? hide : show}>
                             <Button color="inherit" onClick={this.handleRegisterOpen}>注册</Button>
                             <Button color="inherit" onClick={this.handleLoginOpen}>登录</Button>
                         </div>
-                        <div style={this.state.showShoppingCart}>
+                        <div style={this.state.isLogin ? show : hide}>
                             <Typography variant="h6" color="inherit" className={classes.grow} noWrap>
                                 {this.state.username} 您的权限: {this.state.role}
                             </Typography>
-                            <Button color="inherit" onClick={() => this.props.logout()}>登出</Button>
-                            <IconButton className={classes.button} aria-label="Delete" color="inherit" onClick={this.handleShoppingCartOpen}>
-                                <ShoppingCart />
-                            </IconButton>
+                            <Button color="inherit" onClick={() => this.logout()}>登出</Button>
+                            <Link to="/cart">
+                                <IconButton className={classes.button} aria-label="Delete" color="inherit">
+                                    <ShoppingCart />
+                                </IconButton>
+                            </Link>
                         </div>
                     </Toolbar>
                 </AppBar>
@@ -286,31 +291,43 @@ class Navigation extends React.Component {
                     </div>
                     <Divider />
                     <List>
-                        <ListItemLink onClick={this.showIntro}>
-                            <ListItemText primary="首页"/>
-                        </ListItemLink>
-                        <ListItemLink>
-                            <ListItemText primary="推荐列表"/>
-                        </ListItemLink>
-                        <ListItemLink onClick={this.showBooks}>
-                            <ListItemText primary="全部书籍"/>
-                        </ListItemLink>
+                        <Link to="/">
+                            <ListItemLink>
+                                <ListItemText primary="首页"/>
+                            </ListItemLink>
+                        </Link>
+                        <Link to="/books">
+                            <ListItemLink>
+                                    <ListItemText primary="全部书籍"/>
+                            </ListItemLink>
+                        </Link>
                         <Divider/>
-                        <ListItemLink onClick={this.showAllOrders} style={this.state.showShoppingCart}>
-                            <ListItemText primary="查看所有订单"/>
-                        </ListItemLink>
+                        <Link to="/order">
+                            <ListItemLink style={this.state.isLogin ? show : hide}>
+                                <ListItemText primary="查看所有订单"/>
+                            </ListItemLink>
+                        </Link>
                         <Divider/>
-                        <ListItemLink onClick={this.showAllUsers} style={this.state.isAdmin}>
+                        <ListItemLink style={this.state.isAdmin}>
                             <ListItemText primary="管理所有用户"/>
                         </ListItemLink>
-                        <ListItemLink onClick={this.showAdminAllOrders} style={this.state.isAdmin}>
+                        <ListItemLink style={this.state.isAdmin}>
                             <ListItemText primary="管理所有订单"/>
                         </ListItemLink>
-                        <ListItemLink onClick={this.showExpenses} style={this.state.isAdmin}>
+                        <ListItemLink style={this.state.isAdmin}>
                             <ListItemText primary="查看用户的累计消费情况"/>
                         </ListItemLink>
                     </List>
                 </Drawer>
+                <Login
+                    open={this.state.openLogin}
+                    onClose={() => this.handleLoginClose()}
+                    login={() => this.login()} />
+                <Register
+                    open={this.state.openRegister}
+                    onClose={() => this.handleRegisterClose()}
+                    register={() => this.register()}
+                />
             </div>
         );
     }
