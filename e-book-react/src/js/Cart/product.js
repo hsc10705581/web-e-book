@@ -58,7 +58,7 @@ class Product extends React.Component{
     };
 
     render() {
-        const { classes, theme } = this.props;
+        //const { classes, theme } = this.props;
 
         return (
             <TableRow>

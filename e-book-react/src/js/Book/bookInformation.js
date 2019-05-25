@@ -73,7 +73,8 @@ class BookInformation extends Component{
 
     onClickEdit = (key) => {
         let value = prompt("请输入要改成的" + key, this.props[key]);
-        console.log(value);
+        if(value == null)
+            return;
         this.props.updateBook(this.props.bookID, key, value);
     };
 

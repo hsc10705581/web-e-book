@@ -220,11 +220,11 @@ class Order extends Component{
 
     payout = (o_ID) => {
         $.ajax({
-            type: "POST",
+            type: "GET",
             async: false,
-            url: "/finished/" + o_ID,
+            url: "/order/finished/" + o_ID,
             success: function (data) {
-
+                alert(data);
             }
         });
         this.props.refreshOrders();

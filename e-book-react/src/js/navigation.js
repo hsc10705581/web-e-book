@@ -20,7 +20,7 @@ import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import HighLight from '@material-ui/icons/Highlight';
 import Login from './user/login';
 import Register from './user/register';
-import {Link} from "react-router-dom";
+import {Link, withRouter} from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -138,8 +138,13 @@ class Navigation extends React.Component {
         this.props.refreshAllOrders();
     };
 
+    refreshExpenses = () => {
+        this.props.refreshExpenses();
+    };
+
     logout = () => {
         this.props.logout();
+        this.props.history.push("/");
     };
 
     componentWillReceiveProps(nextProps) {
@@ -302,6 +307,11 @@ class Navigation extends React.Component {
                                 <ListItemText primary="管理所有订单"/>
                             </ListItemLink>
                         </Link>
+                        <Link to={global.url.expenses}>
+                            <ListItemLink style={this.state.isAdmin} onClick={this.refreshExpenses}>
+                                <ListItemText primary="管理用户消费"/>
+                            </ListItemLink>
+                        </Link>
                     </List>
                 </Drawer>
                 <main
@@ -327,4 +337,4 @@ Navigation.propTypes = {
     theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Navigation);
+export default withStyles(styles, { withTheme: true })(withRouter(Navigation));

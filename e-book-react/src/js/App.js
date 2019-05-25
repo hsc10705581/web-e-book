@@ -10,6 +10,7 @@ import Introduction from './introuction';
 import Order from './user/order';
 import User from './admin/user';
 import Cart from './Cart/Cart';
+import Expenses from './admin/expenses';
 
 var sectionStyle = {
     width: "100%",
@@ -40,7 +41,7 @@ class App extends Component {
         cartProducts: [],
         orderList: [],
         userList: [],
-        expensesMap: [],
+        expensesMap: {},
     };
 
     login = () => {
@@ -77,7 +78,6 @@ class App extends Component {
             password: document.getElementById("registerPassword1").value,
             email: document.getElementById("registerEmail").value,
         };
-        console.log(saveDataAry);
         if(saveDataAry["username"] === "" || saveDataAry["password"] === "")
             alert("请输入用户名或密码");
         else{
@@ -126,17 +126,21 @@ class App extends Component {
             cartProducts: this.state.cartProducts,
             username: this.state.username,
         };
-        $.ajax({
-            type: "POST",
-            async: false,
-            url: "/cart/checkout",
-            dataType: "json",
-            data: JSON.stringify(saveDataAry),
-            headers: {'Content-Type': 'application/json'},
-            success: function (data){
-                alert(data);
-            }
-        });
+        if(this.state.cartProducts.length === 0)
+            alert("你的购物车是空的！");
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/cart/checkout",
+                async: false,
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
+                success: function (data){
+                    alert(data);
+                }
+            });
+            this.getCartProduct();
+        }
     };
 
     refreshAllOrders = () => {
@@ -167,6 +171,16 @@ class App extends Component {
                 })
             }.bind(this));
     };
+    refreshExpenses = () => {
+        $.get(
+            "/order/get/expenses",
+            function (data) {
+                this.setState({
+                    expensesMap: data,
+                })
+            }.bind(this)
+        )
+    };
     changeStyle(){
         tmp++;
         this.setState({
@@ -185,6 +199,7 @@ class App extends Component {
                             refreshUsers={() => this.refreshUsers()}
                             refreshOrders={() => this.refreshOrders()}
                             refreshAllOrders={() => this.refreshAllOrders()}
+                            refreshExpenses={() => this.refreshExpenses()}
 
                             login={() => this.login()}
                             register={() => this.register()}
@@ -227,6 +242,11 @@ class App extends Component {
                                 <Order
                                     orderList={this.state.orderList}
                                     refreshOrders={() => this.refreshAllOrders()}
+                                />}
+                            />
+                            <Route path={global.url.expenses} exact render={() =>
+                                <Expenses
+                                    expensesMap={this.state.expensesMap}
                                 />}
                             />
                         </Switch>

@@ -9,9 +9,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
-import Button from "@material-ui/core/Button";
-
-import $ from 'jquery';
 
 const styles = theme => ({
     root: {
@@ -59,54 +56,43 @@ const styles = theme => ({
 
 class UserDetail extends Component{
 
-    updateBanned = () => {
-        this.props.banUser(this.props.id);
-    };
-
     render() {
         return (
             <TableRow>
-                <TableCell>{this.props.id}</TableCell>
                 <TableCell>{this.props.username}</TableCell>
-                <TableCell>{this.props.email}</TableCell>
-                <TableCell>{this.props.role}</TableCell>
-                <TableCell>{this.props.banned ? "是" : "否"}</TableCell>
-                <TableCell>
-                    <Button onClick={this.updateBanned}>{this.props.banned ? "解封" : "封禁"}</Button>
-                </TableCell>
+                <TableCell>{this.props.expense}</TableCell>
             </TableRow>
         )
     }
 
 }
 
-class User extends Component{
+class Expenses extends Component{
 
     state = {
-        userList: [],
+        expensesMap: {},
+        expensesList: [],
     };
 
     componentWillReceiveProps(nextProps){
-        if(this.state.userList !== nextProps.userList)
+        if(this.state.expensesMap !== nextProps.expensesMap)
         {
+            let newExpensesList = new Array();
+            let index = 0;
+            for(let key in nextProps.expensesMap){
+                let info = {
+                    "username": key,
+                    "expense": nextProps.expensesMap[key],
+                };
+                newExpensesList[index] = info;
+                index++;
+            }
             this.setState({
-                userList: nextProps.userList,
-            })
+                expensesMap: nextProps.expensesMap,
+                expensesList: newExpensesList,
+            });
         }
     }
-
-    banUser = (u_ID) => {
-        $.ajax({
-            type: "POST",
-            async: false,
-            url: "/user/banned/" + u_ID,
-            data: {},
-            success: function (data) {
-
-            }
-        });
-        this.props.refreshUsers();
-    };
 
     render() {
         const { classes } = this.props;
@@ -121,24 +107,16 @@ class User extends Component{
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>用户ID</TableCell>
                                 <TableCell>用户名</TableCell>
-                                <TableCell>用户email</TableCell>
-                                <TableCell>用户权限</TableCell>
-                                <TableCell>是否被ban</TableCell>
-                                <TableCell>button</TableCell>
+                                <TableCell>用户累计消费</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {this.state.userList.map(user => (
+                            {this.state.expensesList.map(user => (
                                 <UserDetail
-                                    key={user["u_ID"]}
-                                    id={user["u_ID"]}
+                                    key={user["username"]}
+                                    expense={user["expense"]}
                                     username={user["username"]}
-                                    role={user["role"]}
-                                    email={user["email"]}
-                                    banned={user["banned"]}
-                                    banUser={(u_ID) => this.banUser(u_ID)}
                                 />
                             ))}
                         </TableBody>
@@ -149,8 +127,8 @@ class User extends Component{
     }
 }
 
-User.propTypes = {
+Expenses.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(User);
+export default withStyles(styles)(Expenses);

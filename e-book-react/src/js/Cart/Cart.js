@@ -36,7 +36,6 @@ class Cart extends React.Component{
         {
             let totalPrice = 0;
             nextProps.cartProducts.map((p) => {
-                console.log(p);
                 totalPrice += p["amount"] * p["price"];
             });
             this.setState({
@@ -80,7 +79,6 @@ class Cart extends React.Component{
     };
     checkout = () => {
         this.props.checkout();
-        this.props.getCartProduct();
     };
 
     render() {
@@ -94,7 +92,7 @@ class Cart extends React.Component{
                             <TableCell>书名</TableCell>
                             <TableCell align="right">价格</TableCell>
                             <TableCell align="right">数量</TableCell>
-                            <TableCell align="right">书名ID</TableCell>
+                            <TableCell align="right">书本ID</TableCell>
                             <TableCell align="right">加</TableCell>
                             <TableCell align="right">减</TableCell>
                             <TableCell align="right">总价</TableCell>

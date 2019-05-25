@@ -28,7 +28,7 @@ export default class AddBookDialog extends React.Component {
         else {
             this.props.addBookToDB();
             this.props.onClose();
-            alert("添加成功！");
+            //alert("添加成功！");
         }
     };
 

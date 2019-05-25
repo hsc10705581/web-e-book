@@ -159,7 +159,16 @@ class Book extends Component{
         role: null,
     };
 
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps, nextContext) {
+        if (this.state.user !== nextProps.user || this.state.role !== nextProps.role) {
+            this.setState({
+                user: nextProps.user,
+                role: nextProps.role,
+            })
+        }
+    }
+
+    componentDidUpdate(nextProps, nextState, nextContext) {
         if (this.state.user !== nextProps.user || this.state.role !== nextProps.role) {
             this.setState({
                 user: nextProps.user,
@@ -169,6 +178,10 @@ class Book extends Component{
     }
 
     componentDidMount() {
+        this.getBooks();
+    };
+
+    getBooks = () => {
         $.get(
             "/book/all",
             function (data) {
@@ -182,6 +195,7 @@ class Book extends Component{
                 });
             }.bind(this));
     };
+
     addBookToDB = () => {
         let saveDataAry = {
             title: document.getElementById("bookTitle").value,
@@ -191,20 +205,34 @@ class Book extends Component{
             press: document.getElementById("bookPress").value,
             date: document.getElementById("bookDate").value,
             numOfPeople: 0,
-            price: document.getElementById("bookPrice").value,
+            price: parseFloat(document.getElementById("bookPrice").value),
             isbn: document.getElementById("bookIsbn").value,
             introduction: document.getElementById("bookIntroduction").value,
-            stock: document.getElementById("bookStock").value,
+            stock: parseInt(document.getElementById("bookStock").value),
         };
-        $.ajax({
-            url: "/book/add",
-            type: "POST",
-            contentType: "application/json",
-            body: JSON.stringify(saveDataAry),
-            success: function (data) {
-
-            }
-        });
+        if(saveDataAry["title"] === "")
+            alert("请输入书本标题");
+        else if(saveDataAry["author"] === "")
+            alert("请输入作者");
+        else if(saveDataAry["price"] === "")
+            alert("请输入书本价格");
+        else if(saveDataAry["isbn"] === "")
+            alert("请输入书本isbn");
+        else if(saveDataAry["stock"] === "")
+            alert("请输入书本库存量");
+        else{
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/book/add",
+                data: JSON.stringify(saveDataAry),
+                headers: {'Content-Type': 'application/json'},
+                success: function (data) {
+                    alert(data);
+                }
+            });
+            this.getBooks();
+        }
     };
     addABookToCart = (amount, bookID, stock) => {
         let saveDataAry = {
@@ -226,6 +254,8 @@ class Book extends Component{
                 success: function (data){
                     if(data["success"] === false)
                         alert(data["alert"]);
+                    else
+                        alert("成功加入到购物车中");
                 }
             });
         }
@@ -236,7 +266,7 @@ class Book extends Component{
             async: false,
             url: "/book/update/" + key + "?id=" + bookID + "&" + key + "=" + value,
             success: function (data) {
-
+                alert("修改成功！");
             }
         });
         let index = 0;
@@ -256,18 +286,21 @@ class Book extends Component{
             async: false,
             url: "/book/delete?id=" + bookID,
             success: function (data) {
-
+                alert("删除书本成功");
             }
         });
+        /*
         let index = 0;
         for(; index < this.state.bookInfo.length; index++){
             if(this.state.bookInfo[index]["b_ID"] === bookID)
                 break;
         }
-        let newBookInfo = this.state.bookInfo.slice(0, index).concat(this.state.bookInfo.slice(index+1));
+        let newBookInfo = this.state.bookInfo.slice(0, index-1).concat(this.state.bookInfo.slice(index+1));
         this.setState({
             bookInfo: newBookInfo,
         })
+        */
+        this.getBooks();
     };
 
     update(bookInfo){
@@ -393,7 +426,7 @@ class Book extends Component{
                                     <span
                                         className={classes.imageSrc}
                                         style={{
-                                            backgroundImage: `url(${book["img"]})`,
+                                            //backgroundImage: `url(${book["img"]})`,
                                         }}
                                     />
                                 <span className={classes.imageBackdrop} />
