@@ -88,7 +88,8 @@ class OrderDetail extends Component{
             <div>
                 <Toolbar>
                     <Typography variant="h6" color="inherit">
-                        {this.props.order["finished"] ? "已完成的" : "未完成的"}订单号:{this.props.order["o_ID"]}
+                        {this.props.order["finished"] ? "已完成的" : "未完成的"}订单号:{this.props.order["o_ID"]}/
+                        订单日期：{this.props.order["date"]}
                     </Typography>
                 </Toolbar>
                 <Table className={classes.table}>

@@ -426,7 +426,7 @@ class Book extends Component{
                                     <span
                                         className={classes.imageSrc}
                                         style={{
-                                            //backgroundImage: `url(${book["img"]})`,
+                                            backgroundImage: `url(/book/image/${book["b_ID"]})`,
                                         }}
                                     />
                                 <span className={classes.imageBackdrop} />
