@@ -13,6 +13,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^2.1.8",
+    "react-touch-loader": "^1.1.4",
     "slick-carousel": "^1.8.1"
   },
   "scripts": {

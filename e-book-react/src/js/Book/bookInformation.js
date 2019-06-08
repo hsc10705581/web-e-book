@@ -87,7 +87,7 @@ class BookInformation extends Component{
                     <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("title")}><CreateIcon/></Button>
                 </DialogTitle>
                 <DialogContent>
-                    <img src={this.props.img} alt={this.props.title} style={this.props.imgStyle} />
+                    <img src={`/book/image/${this.props.bookID}`} alt={this.props.title} style={this.props.imgStyle} />
                     <Typography gutterBottom>
                         作者: {this.props.author}
                         <Button style={this.props.adminstyle} onClick={() => this.onClickEdit("author")}><CreateIcon/></Button>

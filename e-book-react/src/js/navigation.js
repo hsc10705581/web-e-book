@@ -126,6 +126,14 @@ class Navigation extends React.Component {
         this.props.getCartProduct();
     };
 
+    getExpenses = () => {
+        this.props.getExpenses();
+    };
+
+    getUsersExpenses = () => {
+        this.props.getUsersExpenses();
+    };
+
     refreshUsers = () => {
         this.props.refreshUsers();
     };
@@ -136,10 +144,6 @@ class Navigation extends React.Component {
 
     refreshAllOrders = () => {
         this.props.refreshAllOrders();
-    };
-
-    refreshExpenses = () => {
-        this.props.refreshExpenses();
     };
 
     logout = () => {
@@ -286,6 +290,11 @@ class Navigation extends React.Component {
                             </ListItemLink>
                         </Link>
                         <Divider/>
+                        <Link to={global.url.usersExpenses}>
+                            <ListItemLink style={this.state.isLogin ? show : hide} onClick={this.getUsersExpenses}>
+                                <ListItemText primary="我的消费记录"/>
+                            </ListItemLink>
+                        </Link>
                         <Link to={global.url.order}>
                             <ListItemLink style={this.state.isLogin ? show : hide} onClick={this.refreshOrders}>
                                 <ListItemText primary="我的所有订单"/>
@@ -308,8 +317,13 @@ class Navigation extends React.Component {
                             </ListItemLink>
                         </Link>
                         <Link to={global.url.expenses}>
-                            <ListItemLink style={this.state.isAdmin} onClick={this.refreshExpenses}>
+                            <ListItemLink style={this.state.isAdmin} onClick={this.getExpenses}>
                                 <ListItemText primary="管理用户消费"/>
+                            </ListItemLink>
+                        </Link>
+                        <Link to={global.url.bookSales}>
+                            <ListItemLink style={this.state.isAdmin}>
+                                <ListItemText primary="管理书本销量"/>
                             </ListItemLink>
                         </Link>
                     </List>

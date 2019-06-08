@@ -5,5 +5,7 @@ global.url = {
     user: "/user",
     cart: "/cart",
     allOrders: "/order/all",
-    expenses: "/expenses"
+    expenses: "/expenses",
+    usersExpenses: "/usersExpenses",
+    bookSales: "/bookSales"
 };

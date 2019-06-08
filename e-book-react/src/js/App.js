@@ -11,6 +11,7 @@ import Order from './user/order';
 import User from './admin/user';
 import Cart from './Cart/Cart';
 import Expenses from './admin/expenses';
+import BookSales from './admin/bookSales';
 
 var sectionStyle = {
     width: "100%",
@@ -41,7 +42,7 @@ class App extends Component {
         cartProducts: [],
         orderList: [],
         userList: [],
-        expensesMap: {},
+        expensesList: []
     };
 
     login = () => {
@@ -121,6 +122,24 @@ class App extends Component {
                 }.bind(this));
         }
     };
+    getExpenses = () => {
+        $.get(
+            "/stat/users",
+            function (data) {
+                this.setState({
+                    expensesList: data,
+                })
+            }.bind(this));
+    };
+    getUsersExpenses = () => {
+        $.get(
+            "/stat/user/" + this.state.username,
+            function (data) {
+                this.setState({
+                    expensesList: data,
+                })
+            }.bind(this));
+    };
     checkout = () => {
         let saveDataAry = {
             cartProducts: this.state.cartProducts,
@@ -171,16 +190,6 @@ class App extends Component {
                 })
             }.bind(this));
     };
-    refreshExpenses = () => {
-        $.get(
-            "/order/get/expenses",
-            function (data) {
-                this.setState({
-                    expensesMap: data,
-                })
-            }.bind(this)
-        )
-    };
     changeStyle(){
         tmp++;
         this.setState({
@@ -199,11 +208,12 @@ class App extends Component {
                             refreshUsers={() => this.refreshUsers()}
                             refreshOrders={() => this.refreshOrders()}
                             refreshAllOrders={() => this.refreshAllOrders()}
-                            refreshExpenses={() => this.refreshExpenses()}
 
                             login={() => this.login()}
                             register={() => this.register()}
                             logout={() => this.logout()}
+                            getExpenses={() => this.getExpenses()}
+                            getUsersExpenses={() => this.getUsersExpenses()}
                             username={this.state.username}
                             role={this.state.role}
                         />
@@ -246,7 +256,16 @@ class App extends Component {
                             />
                             <Route path={global.url.expenses} exact render={() =>
                                 <Expenses
-                                    expensesMap={this.state.expensesMap}
+                                    expensesList={this.state.expensesList}
+                                />}
+                            />
+                            <Route path={global.url.usersExpenses} exact render={() =>
+                                <Expenses
+                                    expensesList={this.state.expensesList}
+                                />}
+                            />
+                            <Route path={global.url.bookSales} exact render={() =>
+                                <BookSales
                                 />}
                             />
                         </Switch>

@@ -120,6 +120,12 @@ const styles = theme => ({
         margin: theme.spacing.unit,
         minWidth: 120,
     },
+
+    loadButton: {
+        display: 'flex',
+        justifyContent: 'center',
+        height: 64,
+    }
 });
 
 let bottomStyle= {
@@ -147,6 +153,7 @@ var show = {
 };
 
 class Book extends Component{
+
     //{ classes } = props;
     state = {
         open: defaultOpen,
@@ -155,8 +162,11 @@ class Book extends Component{
         choice: "书名",
         listOpen: false,
         bookInfo: [],
+        saveBookInfo: [],
         user: null,
         role: null,
+        showSize: 20,
+        canLoadMore: true,
     };
 
     componentWillReceiveProps(nextProps, nextContext) {
@@ -179,6 +189,7 @@ class Book extends Component{
 
     componentDidMount() {
         this.getBooks();
+        document.getElementById("loadMoreButton").style.color="#00aaff";
     };
 
     getBooks = () => {
@@ -189,8 +200,11 @@ class Book extends Component{
                 for(let i = 0; i < data.length; i++)
                     defaultOpen[i] = false;
                 this.setState({
+                    saveBookInfo: data,
                     bookInfo: data,
-                    bookList: data,
+                    bookList: data.slice(0, this.state.showSize),
+                    canLoadMore: 20 < data.length,
+                    showSize: 20,
                     open: defaultOpen
                 });
             }.bind(this));
@@ -269,16 +283,7 @@ class Book extends Component{
                 alert("修改成功！");
             }
         });
-        let index = 0;
-        for(; index < this.state.bookInfo.length; index++){
-            if(this.state.bookInfo[index]["b_ID"] === bookID)
-                break;
-        }
-        let newBookInfo = this.state.bookInfo;
-        newBookInfo[index][key] = value;
-        this.setState({
-            bookInfo: newBookInfo,
-        })
+        this.getBooks();
     };
     deleteBook = (bookID) => {
         $.ajax({
@@ -289,26 +294,9 @@ class Book extends Component{
                 alert("删除书本成功");
             }
         });
-        /*
-        let index = 0;
-        for(; index < this.state.bookInfo.length; index++){
-            if(this.state.bookInfo[index]["b_ID"] === bookID)
-                break;
-        }
-        let newBookInfo = this.state.bookInfo.slice(0, index-1).concat(this.state.bookInfo.slice(index+1));
-        this.setState({
-            bookInfo: newBookInfo,
-        })
-        */
         this.getBooks();
     };
 
-    update(bookInfo){
-        this.setState({
-            bookInfo: bookInfo,
-            bookList: bookInfo
-        })
-    }
     handleClickOpen = (bookId) => {
         defaultOpen[bookId] = true;
         this.setState({
@@ -321,7 +309,7 @@ class Book extends Component{
     };
     handleChange(){
         let input = document.getElementById('search').value.toLowerCase();
-        let newList = this.state.bookInfo.filter( (item) => {
+        let newList = this.state.saveBookInfo.filter( (item) => {
             if(this.state.choice === "书名")
                 return item.title.trim().toLowerCase().indexOf(input) !== -1;
             else if(this.state.choice === "作者")
@@ -332,7 +320,10 @@ class Book extends Component{
                 return false;
         });
         this.setState({
-            bookList: newList,
+            bookInfo: newList,
+            bookList: newList.slice(0, 20),
+            canLoadMore: 20 < newList.length,
+            showSize: 20,
         })
     };
     handleListChange = event => {
@@ -355,8 +346,17 @@ class Book extends Component{
         })
     };
 
+    loadMore = () => {
+        this.setState({
+            bookList: this.state.bookInfo.slice(0, this.state.showSize + 20),
+            showSize: this.state.showSize + 20,
+            canLoadMore: this.state.showSize < this.state.bookInfo.length,
+        })
+    };
+
     render(){
         const { classes } = this.props;
+
         return(
             <div className={classes.root}>
                 <Paper className={classes.searchRoot} elevation={1}>
@@ -469,6 +469,13 @@ class Book extends Component{
                             />
                         </div>
                     ))}
+                </div>
+                <div className={classes.loadButton}>
+                    <Button onClick={() => this.loadMore()}
+                            id="loadMoreButton"
+                            style={this.state.canLoadMore ? show : hide}>
+                        加  载  更  多
+                    </Button>
                 </div>
                 <AddBookDialog
                     open={this.state.addBookDialogStyle}
